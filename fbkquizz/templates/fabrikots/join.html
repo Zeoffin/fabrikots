@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    {% load bootstrap5 %}
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+
+    <meta charset="UTF-8">
+    <title>Fabrikots</title>
+</head>
+<body>
+
+<form class="container">
+
+    <!-- Username -->
+    <div class="form-outline mb-4 row">
+        <input type="email" id="form2Example1" class="form-control" />
+        <label class="form-label" for="form2Example1">name</label>
+    </div>
+
+    <!-- Password input -->
+    <div class="form-outline mb-4 row">
+        <input type="password" id="form2Example2" class="form-control" />
+        <label class="form-label" for="form2Example2">pw</label>
+    </div>
+
+    <!-- Submit button -->
+    <button type="button" onclick="login()" class="btn btn-primary btn-block mb-4 row">Nāc, draudziņ</button>
+
+</form>
+
+<script>
+
+    function login() {
+      alert("Hello from a static file!");
+    }
+
+</script>
+
+</body>
+
+</html>
