@@ -1,8 +1,8 @@
 from django.urls import path
-
 from . import views
 
 urlpatterns = [
     path("", views.landing_page, name="Fabrikots"),
-    path("join", views.join_game, name="Fabrikots"),
+    path("game-info", views.GameUsersInfo.as_view(), name="GameUserInfo"),
+    path("update-user", views.UpdateGameUser.as_view(), name="GameUserInfo"),
 ]
