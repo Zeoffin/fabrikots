@@ -4,64 +4,93 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="78803daf-094c-4581-8226-8502ee9f2f1a" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dataSources.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/fabrikots.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/fabrikots.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
+    <list default="true" id="2609a74b-d581-4b1a-acad-c5364a11302e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fabrikots.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/fabrikots.sqlite3" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fabrikots/asgi.py" beforeDir="false" afterPath="$PROJECT_DIR$/fabrikots/asgi.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fabrikots/settings.py" beforeDir="false" afterPath="$PROJECT_DIR$/fabrikots/settings.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fabrikots/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/fabrikots/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fbkquizz/admin.py" beforeDir="false" afterPath="$PROJECT_DIR$/fbkquizz/admin.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/fbkquizz/consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/fbkquizz/consumers.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fbkquizz/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/fbkquizz/models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fbkquizz/urls.py" beforeDir="false" afterPath="$PROJECT_DIR$/fbkquizz/urls.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fbkquizz/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/fbkquizz/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/App.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/App.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/components/UserPoints.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/UserPoints.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/index.css" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Admin.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Admin.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Home.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Home.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Join.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Join.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Terms.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Terms.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="DjangoConsoleOptions" custom-start-script="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)">
+    <option name="myCustomStartScript" value="import sys; print('Python %s on %s' % (sys.version, sys.platform))&#10;import django; print('Django %s' % django.get_version())&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;if 'setup' in dir(django): django.setup()&#10;import django_manage_shell; django_manage_shell.run(PROJECT_ROOT)" />
+  </component>
   <component name="FileTemplateManagerImpl">
     <option name="RECENT_TEMPLATES">
       <list>
-        <option value="Python Script" />
+        <option value="TypeScript File" />
       </list>
     </option>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="MarkdownSettingsMigration">
-    <option name="stateVersion" value="1" />
-  </component>
   <component name="ProjectColorInfo">{
   &quot;customColor&quot;: &quot;&quot;,
   &quot;associatedIndex&quot;: 6
 }</component>
-  <component name="ProjectId" id="2fafepxW8V6ot1IQWMFTiR3ikvg" />
+  <component name="ProjectId" id="2hFNpRN7j2sfbdkBCTmv3CXpKTX" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "RunOnceActivity.OpenDjangoStructureViewOnStart": "true",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.pycharm.django.structure.promotion.once.per.project": "true",
-    "git-widget-placeholder": "master",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Django Server.Server.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.OpenDjangoStructureViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.pycharm.django.structure.promotion.once.per.project&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;master&quot;,
+    &quot;ignore.virus.scanning.warn.message&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
+  <component name="RunManager">
+    <configuration name="Server" type="Python.DjangoServer" factoryName="Django server">
+      <module name="fabrikots" />
+      <option name="ENV_FILES" value="" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+        <env name="DJANGO_SETTINGS_MODULE" value="fabrikots.settings" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="SDK_NAME" value="/home/markuss/fabrikots/venv/bin/python" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <option name="IS_MODULE_SDK" value="false" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="launchJavascriptDebuger" value="false" />
+      <option name="port" value="8000" />
+      <option name="host" value="localhost" />
+      <option name="additionalOptions" value="" />
+      <option name="browserUrl" value="" />
+      <option name="runTestServer" value="false" />
+      <option name="runNoReload" value="false" />
+      <option name="useCustomRunCommand" value="false" />
+      <option name="customRunCommand" value="" />
+      <method v="2" />
+    </configuration>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -73,15 +102,28 @@
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
     <task active="true" id="Default" summary="Default task">
-      <changelist id="78803daf-094c-4581-8226-8502ee9f2f1a" name="Changes" comment="" />
-      <created>1714044212531</created>
+      <changelist id="2609a74b-d581-4b1a-acad-c5364a11302e" name="Changes" comment="" />
+      <created>1717186049973</created>
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
-      <updated>1714044212531</updated>
-      <workItem from="1714044214028" duration="610000" />
-      <workItem from="1715501210158" duration="6773000" />
-      <workItem from="1715794640777" duration="31000" />
-      <workItem from="1715795136981" duration="5306000" />
+      <updated>1717186049973</updated>
+      <workItem from="1717186053362" duration="2703000" />
+      <workItem from="1717231360884" duration="1880000" />
+      <workItem from="1717320802941" duration="2207000" />
+      <workItem from="1720961411173" duration="67000" />
+      <workItem from="1732912487526" duration="598000" />
+      <workItem from="1733053385443" duration="3796000" />
+      <workItem from="1733253148270" duration="10414000" />
+      <workItem from="1733311421065" duration="18990000" />
+      <workItem from="1733392833435" duration="5193000" />
+      <workItem from="1735852345797" duration="3000" />
+      <workItem from="1736204468046" duration="740000" />
+      <workItem from="1736269226686" duration="647000" />
+      <workItem from="1736269881072" duration="12462000" />
+      <workItem from="1736448198178" duration="4338000" />
+      <workItem from="1741958227594" duration="108000" />
+      <workItem from="1746347434306" duration="770000" />
+      <workItem from="1750836590674" duration="2191000" />
     </task>
     <servers />
   </component>

@@ -5,4 +5,5 @@ urlpatterns = [
     path("", views.landing_page, name="Fabrikots"),
     path("game-info", views.GameUsersInfo.as_view(), name="GameUserInfo"),
     path("update-user", views.UpdateGameUser.as_view(), name="GameUserInfo"),
+    path("get-question", views.Questions.as_view(), name="Questions"),
 ]

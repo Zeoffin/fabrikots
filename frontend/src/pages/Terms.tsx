@@ -8,7 +8,7 @@ function Terms() {
         <>
             <div id={"back-button"}>
                 <Link to={"/"}>
-                    <Button variant="outlined">Atpakaļ</Button>
+                    <Button variant="outlined">{"<==="}</Button>
                 </Link>
             </div>
 

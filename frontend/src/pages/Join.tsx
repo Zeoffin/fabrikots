@@ -16,6 +16,7 @@ function Join({handleState}: Props) {
 
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [status, setStatus] = useState(true);
     const [terms, setTerms] = useState(false);
 
     const GoToTerms = () => {
@@ -32,37 +33,35 @@ function Join({handleState}: Props) {
     }
 
     const JoinForm = () => {
-
         return (
+            <>
+                <div className={"neon-text-flicker"}>FABRIKOTS</div>
+                <div className="join-form">
+                    <p style={{color: "red"}} hidden={status}>Nepareizi ierakstīji</p>
+                    <Form onSubmit={e => submitLogin(e)}>
+                        <Form.Group className="mb-3 spacing_login" controlId="formBasicEmail">
+                            <Form.Control type="username" placeholder="username" value={username}
+                                          onChange={e => setUsername(e.target.value)}/>
+                            <Form.Text className="text-muted">
+                            </Form.Text>
+                        </Form.Group>
 
-            <div className="join-form">
+                        <Form.Group className="mb-3 spacing_login" controlId="formBasicPassword">
+                            <Form.Control type="password" placeholder="pw" value={password}
+                                          onChange={e => setPassword(e.target.value)}/>
+                        </Form.Group>
 
-                <Form onSubmit={e => submitLogin(e)}>
-                    <Form.Group className="mb-3 spacing_login" controlId="formBasicEmail">
-                        <Form.Control type="username" placeholder="username" value={username}
-                                      onChange={e => setUsername(e.target.value)}/>
-                        <Form.Text className="text-muted">
-                        </Form.Text>
-                    </Form.Group>
+                        <Form.Group className="mb-3 spacing_login" controlId="formBasicCheckbox">
+                            <Form.Check type="checkbox" label={GoToTerms()} onChange={e => setTerms(e.target.checked)}/>
+                        </Form.Group>
 
-                    <Form.Group className="mb-3 spacing_login" controlId="formBasicPassword">
-                        <Form.Control type="password" placeholder="pw" value={password}
-                                      onChange={e => setPassword(e.target.value)}/>
-                    </Form.Group>
-
-                    <Form.Group className="mb-3 spacing_login" controlId="formBasicCheckbox">
-                        <Form.Check type="checkbox" label={GoToTerms()} onChange={e => setTerms(e.target.checked)}/>
-                    </Form.Group>
-
-                    <Button variant="outline-primary" type="submit" disabled={!terms}>
-                        Nāc, draudziņ :)
-                    </Button>
-
-                </Form>
-            </div>
-
+                        <Button variant="outline-primary" type="submit" disabled={!terms}>
+                            Nāc, draudziņ :)
+                        </Button>
+                    </Form>
+                </div>
+            </>
         )
-
     }
 
     function submitLogin(e) {
@@ -77,8 +76,10 @@ function Join({handleState}: Props) {
         ).then(function (res) {
             axiosInstance.defaults.headers['X-Csrftoken'] = Cookies.get('csrftoken');
             handleState(true);
+        }).catch((e) => {
+           setStatus(false);
+           setPassword('');
         });
-
     }
 
     return (

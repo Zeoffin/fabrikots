@@ -10,10 +10,19 @@ class Question(models.Model):
         - None (no user input required !)
     """
 
-    title = models.CharField(max_length=60)
-    text = models.CharField(max_length=200)
-    type = models.CharField(max_length=20, default=None, blank=True)
+    TYPES = (
+        ("info", "info"),
+        ("multipleChoice", "multipleChoice")
+    )
+
+    title = models.CharField(max_length=60, blank=True)
+    text = models.CharField(max_length=200, blank=True)
+    # active = models.BooleanField(default=False)
+    type = models.CharField(max_length=256, choices=TYPES)
+    answers = models.JSONField(default=dict, blank=True)
+    time = models.IntegerField(default=0)
     notes = models.CharField(max_length=400, blank=True)
+    finished = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.id} | {self.title}"
@@ -21,13 +30,18 @@ class Question(models.Model):
 
 class GlobalSettings(models.Model):
     # Model that stores current question / trivia (order, id? )
-    pass
+    currentQuestion = models.ForeignKey(Question, default=None, on_delete=models.CASCADE)
+    timer = models.IntegerField(default=30)
+
+    def __str__(self):
+        return f"{self.id}"
 
 
 class UserSettings(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     active = models.BooleanField()
     points = models.IntegerField(default=0)
+    answers = models.JSONField(default=dict, blank=True)
 
     def __str__(self):
         return f"{self.user.username}"

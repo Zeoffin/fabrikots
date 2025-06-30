@@ -14,41 +14,47 @@ const noUsers = {
 }
 
 interface Props {
-    isStaff: boolean
+    isStaff: boolean,
+    sendMessage: any,
+    lastMessage: any,
+    readyState: any
 }
 
-function UserPoints({isStaff}: Props) {
+function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
 
     const [userPoints, setUserPoints] = useState(noUsers);
-    const {sendMessage, lastMessage, readyState} = useWebSocket(pointsSocket);
-
-    // TODO: Websockets - https://www.npmjs.com/package/react-use-websocket
-    const connectionStatus = {
-        [ReadyState.CONNECTING]: 'Connecting',
-        [ReadyState.OPEN]: 'Open',
-        [ReadyState.CLOSING]: 'Closing',
-        [ReadyState.CLOSED]: 'Closed',
-        [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
-    }[readyState];
 
     useEffect(() => {
+
+        if (lastMessage) {
+            const messageData = JSON.parse(lastMessage["data"]);
+            if ("points" in messageData) {
+                getGameInfo();
+            }
+        } else if (userPoints === noUsers) {
+            getGameInfo();
+        }
+
+    }, [lastMessage]);
+
+    const getGameInfo = () => {
         axiosInstance.get("/game-info")
             .then(function (res) {
-                console.log("NEW GAME INFO:");
-                console.log(res.data);
+                // console.log("NEW GAME INFO:");
+                // console.log(res.data);
                 setUserPoints(res.data);
             })
             .catch(function (error) {
                 console.log(error);
             });
-    }, [lastMessage]);
+    }
 
-    useEffect(() => {
-        console.log("MSG Received:");
-        console.log(lastMessage);
-    }, [lastMessage]);
+    // useEffect(() => {
+    //     console.log("MSG Received:");
+    //     console.log(lastMessage);
+    // }, [lastMessage]);
 
-    const changePoint = useCallback( (e, user, addPoint) => {
+    const changePoint = useCallback((e, user, addPoint) => {
         e.preventDefault();
         const point_change = {
             "user": user,
@@ -60,6 +66,14 @@ function UserPoints({isStaff}: Props) {
 
     // https://medium.com/@ismailtaufiq19/display-objects-key-value-pairs-in-reactjs-95d8a26bd74b
     const setupUsers = () => {
+
+        // console.log(userPoints.response);
+        // let sortedPoints = {};
+        // Object.keys(userPoints.response)
+        //     .sort()
+        //     .forEach((key) => {
+        //         sortedPoints[key] = userPoints.response[key];
+        //     });
 
         if (isStaff) {
 

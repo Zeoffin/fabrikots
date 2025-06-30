@@ -32,15 +32,11 @@ function App() {
     }
 
     if (currentUser) {
-        if (isStaff) {
-            return (
-                <Admin/>
-            )
-        }
         return (
-            <Home/>
-        );
+            <Home isAdmin={isStaff}/>
+        )
     }
+    
     return (
         <Join handleState={handleSetCurrentUser}/>
     );

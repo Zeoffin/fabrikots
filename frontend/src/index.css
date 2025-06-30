@@ -36,6 +36,7 @@ a:hover {
 h1 {
     font-size: 3.2em;
     line-height: 1.1;
+    line-height: 1.1;
 }
 
 .card {
@@ -59,15 +60,18 @@ h1 {
 .user-points {
     float: right;
     width: 160px;
-    border-radius: 10px;
+    border-radius: 2px;
     text-align: left;
 }
 
 .join-form {
-    display: flex;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
     place-items: center;
-    margin-left: 45%;
-    margin-top: 30vh;
+    width: 200px;
+    /*margin-left: 45%;*/
+    margin-top: 7vh;
 }
 
 .user-row {
@@ -80,8 +84,58 @@ h1 {
 
 .change-points {
     min-width: 0px !important;
-    /*margin: 0px !important;*/
-    /*margin-right: 30px !important;*/
     padding-left: 0px !important;
     height: 4px;
+}
+
+.neon-text-flicker {
+    font-size: 6rem;
+    font-weight: bold;
+    letter-spacing: 10px;
+    margin-top: 200px;
+    color: #272727;
+    animation: flicker 8s 2s infinite normal;
+}
+
+.neon-text {
+    color: #272727;
+    font-size: 4rem;
+    font-weight: bold;
+    letter-spacing: 10px;
+    text-shadow: 0 0 4px #272727,
+    0 0 4px #272727,
+    0 0 11px #272727,
+    0 0 19px #272727,
+    0 0 40px #0fa,
+    0 0 80px #0fa;
+}
+
+@keyframes flicker {
+    0%, 25%, 27%, 74% {
+        color: #1c2f23;
+        text-shadow: 0 0 4px #272727,
+        0 0 4px #272727,
+        0 0 11px #272727,
+        0 0 19px #272727,
+        0 0 40px #0fa,
+        0 0 80px #0fa,
+        0 0 90px #0fa,
+        0 0 100px #0fa,
+        0 0 150px #0fa;
+    }
+    26%, 75%, 100% {
+        text-shadow: none;
+    }
+}
+
+.questions {
+    background-color: #5f5757;
+    border: #5f5757 1px solid;
+    border-radius: 10px;
+    width: 60vw;
+    margin-top: 20px;
+}
+
+.q-container {
+    margin-left: 5%;
 }
