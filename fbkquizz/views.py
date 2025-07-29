@@ -137,5 +137,55 @@ class AcceptAnswer(APIView):
             return Response({"error": "Question not found"}, status=status.HTTP_404_NOT_FOUND)
 
 
+class DeleteAnswersByQuestionId(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    authentication_classes = (SessionAuthentication,)
+
+    def post(self, request):
+        # Only allow admin (markuss) to delete answers
+        if request.user.username != "markuss":
+            return Response({"error": "Not authorized"}, status=status.HTTP_403_FORBIDDEN)
+        
+        question_id = request.data.get("question_id")
+        
+        if not question_id:
+            return Response({"error": "question_id required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            # Get all user settings
+            user_settings = UserSettings.objects.all()
+            updated_users = []
+            
+            for user_setting in user_settings:
+                # Check if user has answers for this question
+                if user_setting.answers and str(question_id) in user_setting.answers:
+                    del user_setting.answers[str(question_id)]
+                    updated_users.append(user_setting.user.username)
+                
+                # Check if user has accepted answers for this question and subtract points
+                if user_setting.accepted_answers and str(question_id) in user_setting.accepted_answers:
+                    del user_setting.accepted_answers[str(question_id)]
+                    # Get the question to subtract points
+                    question = Question.objects.get(id=question_id)
+                    user_setting.points -= question.points
+                    # Ensure points don't go negative
+                    if user_setting.points < 0:
+                        user_setting.points = 0
+                
+                user_setting.save()
+            
+            return Response({
+                "success": True,
+                "question_id": question_id,
+                "updated_users": updated_users,
+                "message": f"Deleted answers for question {question_id} from all users"
+            }, status=status.HTTP_200_OK)
+            
+        except Question.DoesNotExist:
+            return Response({"error": "Question not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 def landing_page(request):
     return render(request, "fabrikots/index.html")

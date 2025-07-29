@@ -139,6 +139,21 @@ function Home({isAdmin}: Props) {
         }
     }
 
+    const deleteAnswersForCurrentQuestion = () => {
+        if (isAdmin && question) {
+            axiosInstance.post("/delete-answers", {
+                question_id: question
+            }).then(function (res) {
+                console.log("Deleted answers for question", question);
+                console.log(res.data);
+                // Send websocket message to refresh user data
+                sendMessage(JSON.stringify({"refresh_users": true}));
+            }).catch((e) => {
+                console.error("Error deleting answers:", e);
+            });
+        }
+    }
+
 
     // ===================================================================================      RENDER STUFF
 
@@ -308,6 +323,19 @@ function Home({isAdmin}: Props) {
                                         onClick={e => startTimer(e)}
                                         style={{margin: "1rem"}}>
                                         Start Timer
+                                    </Button>
+                                </Grid>
+
+                                <Grid item xs={12} style={{maxWidth: "180px"}} hidden={!isAdmin}>
+                                    <Button 
+                                        className="modern-button"
+                                        onClick={deleteAnswersForCurrentQuestion}
+                                        style={{
+                                            margin: "1rem",
+                                            backgroundColor: "#ff4444",
+                                            color: "white"
+                                        }}>
+                                        Delete All Answers
                                     </Button>
                                 </Grid>
 
