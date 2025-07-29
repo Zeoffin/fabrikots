@@ -244,10 +244,11 @@ class QuizzConsumer(AsyncWebsocketConsumer):
             user_setting.answers = {}
         
         # Handle different answer formats: selected_answer (multiple choice) or text_answer (free text)
-        answer = answer_data.get("selected_answer") or answer_data.get("text_answer")
+        answer = answer_data.get("selected_answer") if "selected_answer" in answer_data else answer_data.get("text_answer")
         
         # Save the answer (empty answers will be saved as empty string for proper point deduction)
-        user_setting.answers[str(current_question_id)] = answer if answer else ""
+        # Use 'is not None' to handle case where selected_answer is 0 (first option)
+        user_setting.answers[str(current_question_id)] = answer if answer is not None else ""
         user_setting.save()
 
     @database_sync_to_async
@@ -349,7 +350,7 @@ class QuizzConsumer(AsyncWebsocketConsumer):
         
         for user_setting in users_with_answers:
             answer = user_setting.answers.get(str(current_question_id))
-            if answer and str(answer).strip():  # Only include non-empty answers
+            if answer is not None and str(answer).strip():  # Only include non-empty answers
                 is_accepted = user_setting.accepted_answers.get(str(current_question_id), False) if user_setting.accepted_answers else False
                 user_answers.append({
                     'username': user_setting.user.username,

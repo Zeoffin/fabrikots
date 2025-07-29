@@ -146,8 +146,6 @@ function Home({isAdmin}: Props) {
             }).then(function (res) {
                 console.log("Deleted answers for question", question);
                 console.log(res.data);
-                // Send websocket message to refresh user data
-                sendMessage(JSON.stringify({"refresh_users": true}));
             }).catch((e) => {
                 console.error("Error deleting answers:", e);
             });
@@ -299,44 +297,69 @@ function Home({isAdmin}: Props) {
                                 </Grid>
 
 
-                                <Grid item xs={6} style={{maxWidth: "150px"}} hidden={!isAdmin}>
-                                    <Button 
-                                        className="modern-button"
-                                        onClick={e => chooseQuestion(e, "previous")}
-                                        style={{margin: "1rem"}}>
-                                        Previous
-                                    </Button>
-                                </Grid>
-
-                                <Grid item xs={6} style={{maxWidth: "150px"}} hidden={!isAdmin}>
-                                    <Button 
-                                        className="modern-button"
-                                        onClick={e => chooseQuestion(e, "next")}
-                                        style={{margin: "1rem"}}>
-                                        Next
-                                    </Button>
-                                </Grid>
-
-                                <Grid item xs={12} style={{maxWidth: "150px"}} hidden={!isAdmin}>
-                                    <Button 
-                                        className="modern-button"
-                                        onClick={e => startTimer(e)}
-                                        style={{margin: "1rem"}}>
-                                        Start Timer
-                                    </Button>
-                                </Grid>
-
-                                <Grid item xs={12} style={{maxWidth: "180px"}} hidden={!isAdmin}>
-                                    <Button 
-                                        className="modern-button"
-                                        onClick={deleteAnswersForCurrentQuestion}
-                                        style={{
-                                            margin: "1rem",
-                                            backgroundColor: "#ff4444",
-                                            color: "white"
+                                <Grid item xs={12} hidden={!isAdmin}>
+                                    <div style={{
+                                        display: "flex",
+                                        justifyContent: "center",
+                                        gap: "1rem",
+                                        padding: "1rem",
+                                        // backgroundColor: "rgba(0, 0, 0, 0.3)",
+                                        // borderRadius: "10px",
+                                        // border: "1px solid rgba(0, 255, 170, 0.3)",
+                                        marginTop: "2rem"
+                                    }}>
+                                        <div style={{
+                                            display: "flex",
+                                            gap: "0.5rem"
                                         }}>
-                                        Delete All Answers
-                                    </Button>
+                                            <Button 
+                                                className="modern-button"
+                                                onClick={e => chooseQuestion(e, "previous")}
+                                                style={{
+                                                    minWidth: "100px",
+                                                    fontSize: "0.9rem",
+                                                    color: "white",
+                                                    background: "#0175c7",
+                                                }}>
+                                                Previous
+                                            </Button>
+                                            <Button 
+                                                className="modern-button"
+                                                onClick={e => chooseQuestion(e, "next")}
+                                                style={{
+                                                    minWidth: "100px",
+                                                    fontSize: "0.9rem",
+                                                    color: "white",
+                                                    background: "#0175c7",
+                                                }}>
+                                                Next
+                                            </Button>
+                                        </div>
+                                        
+                                        <Button 
+                                            className="modern-button"
+                                            onClick={e => startTimer(e)}
+                                            style={{
+                                                minWidth: "120px",
+                                                fontSize: "0.9rem",
+                                                background: "#00aa55",
+                                                color: "white"
+                                            }}>
+                                            Start Timer
+                                        </Button>
+                                        
+                                        <Button 
+                                            className="modern-button"
+                                            onClick={deleteAnswersForCurrentQuestion}
+                                            style={{
+                                                minWidth: "140px",
+                                                fontSize: "0.9rem",
+                                                background: "#ff4444",
+                                                color: "white",
+                                            }}>
+                                            Delete answers
+                                        </Button>
+                                    </div>
                                 </Grid>
 
                             </Grid>

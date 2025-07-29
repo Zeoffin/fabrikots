@@ -64,6 +64,7 @@ class Questions(APIView):
         data["type"] = question.type
         data["answers"] = question.answers
         data["time"] = question.time
+        data["image"] = question.image.url if question.image else None
 
         return Response(data, status=status.HTTP_200_OK)
 

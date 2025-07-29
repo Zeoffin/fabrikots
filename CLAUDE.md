@@ -118,3 +118,4 @@ python manage.py migrate
 ## Development Environment
 
 - Always use the venv located in the directory.
+- Always use the already existing venv before attempting any code execution or tests.

@@ -61,6 +61,25 @@ function FreeText({data, timer, sendMessage, showCorrectAnswer, correctAnswer, a
                  dangerouslySetInnerHTML={{__html: data["text"]}}>
             </div>
 
+            {data["image"] && (
+                <div style={{ 
+                    textAlign: "center",
+                    marginBottom: "2rem"
+                }}>
+                    <img 
+                        src={`http://127.0.0.1:8000${data["image"]}`}
+                        alt="Question image"
+                        style={{
+                            maxWidth: "100%",
+                            maxHeight: "400px",
+                            borderRadius: "12px",
+                            border: "1px solid rgba(255, 255, 255, 0.2)",
+                            boxShadow: "0 4px 20px rgba(0, 0, 0, 0.3)"
+                        }}
+                    />
+                </div>
+            )}
+
             <div style={{
                 display: "flex",
                 flexDirection: "column",

@@ -41,6 +41,11 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
                 setUserPoints({
                     response: messageData["user_points"]
                 });
+            } else if (messageData["type"] === "answer_accepted" && messageData["user_points"]) {
+                // Update points directly from WebSocket message when answers are accepted
+                setUserPoints({
+                    response: messageData["user_points"]
+                });
             }
         } else if (userPoints === noUsers) {
             getGameInfo();

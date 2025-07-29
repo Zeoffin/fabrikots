@@ -25,6 +25,7 @@ class Question(models.Model):
     time = models.IntegerField(default=0)
     notes = models.CharField(max_length=400, blank=True)
     finished = models.BooleanField(default=False)
+    image = models.ImageField(upload_to='question_images/', blank=True, null=True)
 
     def __str__(self):
         return f"{self.id} | {self.title}"
