@@ -55,9 +55,9 @@ function Join({handleState}: Props) {
                             <Form.Check type="checkbox" label={GoToTerms()} onChange={e => setTerms(e.target.checked)}/>
                         </Form.Group>
 
-                        <Button variant="outline-primary" type="submit" disabled={!terms}>
+                        <button className="modern-button" type="submit" disabled={!terms}>
                             Nāc, draudziņ :)
-                        </Button>
+                        </button>
                     </Form>
                 </div>
             </>

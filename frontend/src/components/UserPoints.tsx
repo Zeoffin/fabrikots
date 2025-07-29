@@ -28,8 +28,19 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
 
         if (lastMessage) {
             const messageData = JSON.parse(lastMessage["data"]);
-            if ("points" in messageData) {
+            if ("points" in messageData && messageData["user_points"]) {
+                // Update points directly from WebSocket message for manual changes
+                setUserPoints({
+                    response: messageData["user_points"]
+                });
+            } else if ("points" in messageData) {
+                // Fallback to API call if no user_points data
                 getGameInfo();
+            } else if (messageData["type"] === "timer_ended" && messageData["user_points"]) {
+                // Update points directly from WebSocket message for timer end
+                setUserPoints({
+                    response: messageData["user_points"]
+                });
             }
         } else if (userPoints === noUsers) {
             getGameInfo();
@@ -67,52 +78,124 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
     // https://medium.com/@ismailtaufiq19/display-objects-key-value-pairs-in-reactjs-95d8a26bd74b
     const setupUsers = () => {
 
-        // console.log(userPoints.response);
-        // let sortedPoints = {};
-        // Object.keys(userPoints.response)
-        //     .sort()
-        //     .forEach((key) => {
-        //         sortedPoints[key] = userPoints.response[key];
-        //     });
+        // Sort users by points in descending order
+        const sortedUsers = Object.keys(userPoints.response)
+            .sort((a, b) => userPoints.response[b]['points'] - userPoints.response[a]['points']);
 
         if (isStaff) {
 
             return (
-                Object.keys(userPoints.response).map((key, index) => (
-                    <>
-                        <Grid container key={key} className={"user-row"}>
+                sortedUsers.map((key, index) => (
+                    <div key={key} className="admin-user-row" style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '6px 8px',
+                        margin: '4px 0',
+                        background: 'rgba(255, 255, 255, 0.05)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '8px',
+                        transition: 'all 0.2s ease'
+                    }}>
+                        <div style={{
+                            color: 'rgba(255, 255, 255, 0.9)',
+                            fontSize: '11px',
+                            fontWeight: '500',
+                            minWidth: '40px',
+                            maxWidth: '40px',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
+                        }}>
+                            {key}
+                        </div>
 
-                            <Grid item xs={8}>
-                                {key}:
-                            </Grid>
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '3px'
+                        }}>
+                            <button 
+                                onClick={(e) => changePoint(e, key, false)}
+                                disabled={readyState !== ReadyState.OPEN}
+                                style={{
+                                    background: 'rgba(255, 75, 87, 0.8)',
+                                    border: '1px solid rgba(255, 75, 87, 0.5)',
+                                    borderRadius: '4px',
+                                    color: 'white',
+                                    padding: '2px 4px',
+                                    fontSize: '10px',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    transition: 'all 0.2s ease',
+                                    minWidth: '18px',
+                                    height: '18px'
+                                }}
+                                onMouseOver={(e) => {
+                                    if (!e.target.disabled) {
+                                        e.target.style.background = 'rgba(255, 75, 87, 1)';
+                                        e.target.style.transform = 'scale(1.05)';
+                                    }
+                                }}
+                                onMouseOut={(e) => {
+                                    e.target.style.background = 'rgba(255, 75, 87, 0.8)';
+                                    e.target.style.transform = 'scale(1)';
+                                }}>
+                                −
+                            </button>
 
-                            <Grid item xs={1}>
-                                <Button className={"change-points"}
-                                        onClick={(e) => changePoint(e, key, false)}
-                                        disabled={readyState !== ReadyState.OPEN}>-</Button>
-                            </Grid>
-
-                            <Grid item xs={2}>
+                            <div style={{
+                                color: 'rgba(0, 255, 170, 0.9)',
+                                fontSize: '11px',
+                                fontWeight: '700',
+                                minWidth: '16px',
+                                textAlign: 'center',
+                                background: 'rgba(0, 255, 170, 0.1)',
+                                padding: '2px 4px',
+                                borderRadius: '4px'
+                            }}>
                                 {userPoints.response[key]['points']}
-                            </Grid>
+                            </div>
 
-                            <Grid item xs={1}>
-                                {/*<Button className={"change-points"} onClick={(e) => addPoint(key)}>+</Button>*/}
-                                <Form onSubmit={e => changePoint(e, key, true)}>
-                                    <Button className={"change-points"} type={"submit"}
-                                            disabled={readyState !== ReadyState.OPEN}>+</Button>
-                                </Form>
-                            </Grid>
-
-                        </Grid>
-                    </>
+                            <Form onSubmit={e => changePoint(e, key, true)} style={{margin: 0}}>
+                                <button 
+                                    type="submit"
+                                    disabled={readyState !== ReadyState.OPEN}
+                                    style={{
+                                        background: 'rgba(0, 255, 170, 0.8)',
+                                        border: '1px solid rgba(0, 255, 170, 0.5)',
+                                        borderRadius: '4px',
+                                        color: 'white',
+                                        padding: '2px 4px',
+                                        fontSize: '10px',
+                                        fontWeight: '600',
+                                        cursor: 'pointer',
+                                        transition: 'all 0.2s ease',
+                                        minWidth: '18px',
+                                        height: '18px'
+                                    }}
+                                    onMouseOver={(e) => {
+                                        if (!e.target.disabled) {
+                                            e.target.style.background = 'rgba(0, 255, 170, 1)';
+                                            e.target.style.transform = 'scale(1.05)';
+                                        }
+                                    }}
+                                    onMouseOut={(e) => {
+                                        e.target.style.background = 'rgba(0, 255, 170, 0.8)';
+                                        e.target.style.transform = 'scale(1)';
+                                    }}>
+                                    +
+                                </button>
+                            </Form>
+                        </div>
+                    </div>
                 ))
             )
 
         } else {
 
             return (
-                Object.keys(userPoints.response).map((key, index) => (
+                sortedUsers.map((key, index) => (
                     <>
                         <Grid container key={key} className={"user-row"}>
 
@@ -133,17 +216,23 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
     }
 
     return (
-
         <Box className={"user-points contrast"}>
             <Grid container>
-
                 <Grid item xs={12} className={"center"}>
-                    <b style={{marginLeft: "32%"}}>Points</b>
+                    <h3 style={{
+                        color: 'rgba(0, 255, 170, 0.9)',
+                        margin: '0 0 1rem 0',
+                        fontSize: '1.2rem',
+                        textTransform: 'uppercase',
+                        letterSpacing: '2px',
+                        textAlign: 'center'
+                    }}>
+                        Points
+                    </h3>
                 </Grid>
                 {setupUsers()}
             </Grid>
         </Box>
-
     )
 
 }

@@ -12,7 +12,8 @@ class Question(models.Model):
 
     TYPES = (
         ("info", "info"),
-        ("multipleChoice", "multipleChoice")
+        ("multipleChoice", "multipleChoice"),
+        ("freeText", "freeText")
     )
 
     title = models.CharField(max_length=60, blank=True)
@@ -20,6 +21,7 @@ class Question(models.Model):
     # active = models.BooleanField(default=False)
     type = models.CharField(max_length=256, choices=TYPES)
     answers = models.JSONField(default=dict, blank=True)
+    points = models.IntegerField(default=1, blank=True)
     time = models.IntegerField(default=0)
     notes = models.CharField(max_length=400, blank=True)
     finished = models.BooleanField(default=False)
