@@ -76,6 +76,19 @@ function Home({isAdmin}: Props) {
                 }
             }
 
+            if (messageData["type"] === "answer_accepted") {
+                // Update the accepted status in allUserAnswers
+                if (allUserAnswers) {
+                    const updatedAnswers = allUserAnswers.map(userAnswer => {
+                        if (userAnswer.username === messageData["accepted_username"]) {
+                            return { ...userAnswer, accepted: true };
+                        }
+                        return userAnswer;
+                    });
+                    setAllUserAnswers(updatedAnswers);
+                }
+            }
+
         }
 
     }, [lastMessage]);
@@ -113,6 +126,17 @@ function Home({isAdmin}: Props) {
 
     const chooseQuestion = (e, direction) => {
         sendMessage(JSON.stringify({"direction": direction}));
+    }
+
+    const acceptAnswer = (username: string) => {
+        if (isAdmin && question) {
+            sendMessage(JSON.stringify({
+                "accept_answer": {
+                    "username": username,
+                    "question_id": question
+                }
+            }));
+        }
     }
 
 
@@ -218,6 +242,8 @@ function Home({isAdmin}: Props) {
                     showCorrectAnswer={showCorrectAnswer}
                     correctAnswer={correctAnswer}
                     allUserAnswers={allUserAnswers}
+                    isAdmin={isAdmin}
+                    onAcceptAnswer={acceptAnswer}
                 />
 
         }

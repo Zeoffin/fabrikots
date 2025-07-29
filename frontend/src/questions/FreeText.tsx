@@ -6,10 +6,12 @@ interface props {
     sendMessage: any,
     showCorrectAnswer: boolean,
     correctAnswer: string | null,
-    allUserAnswers: Array<{username: string, answer: string}> | null
+    allUserAnswers: Array<{username: string, answer: string, accepted?: boolean}> | null,
+    isAdmin?: boolean,
+    onAcceptAnswer?: (username: string) => void
 }
 
-function FreeText({data, timer, sendMessage, showCorrectAnswer, correctAnswer, allUserAnswers}: props) {
+function FreeText({data, timer, sendMessage, showCorrectAnswer, correctAnswer, allUserAnswers, isAdmin, onAcceptAnswer}: props) {
 
     const [userAnswer, setUserAnswer] = useState("");
 
@@ -88,15 +90,47 @@ function FreeText({data, timer, sendMessage, showCorrectAnswer, correctAnswer, a
                             gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))"
                         }}>
                             {allUserAnswers.map((userAnswer, index) => (
-                                <div key={index} style={{
+                                <div key={index} 
+                                     onClick={() => isAdmin && onAcceptAnswer && !userAnswer.accepted ? onAcceptAnswer(userAnswer.username) : null}
+                                     style={{
                                     padding: "1rem",
-                                    background: "rgba(255, 255, 255, 0.05)",
-                                    border: "1px solid rgba(0, 255, 170, 0.2)",
+                                    background: userAnswer.accepted ? "rgba(0, 255, 0, 0.1)" : "rgba(255, 255, 255, 0.05)",
+                                    border: userAnswer.accepted ? "1px solid rgba(0, 255, 0, 0.5)" : "1px solid rgba(0, 255, 170, 0.2)",
                                     borderRadius: "12px",
-                                    backdropFilter: "blur(10px)"
-                                }}>
+                                    backdropFilter: "blur(10px)",
+                                    cursor: isAdmin && !userAnswer.accepted ? "pointer" : "default",
+                                    transition: "all 0.3s ease",
+                                    position: "relative"
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (isAdmin && !userAnswer.accepted) {
+                                        const target = e.currentTarget as HTMLDivElement;
+                                        target.style.transform = "scale(1.02)";
+                                        target.style.boxShadow = "0 0 20px rgba(0, 255, 170, 0.3)";
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (isAdmin && !userAnswer.accepted) {
+                                        const target = e.currentTarget as HTMLDivElement;
+                                        target.style.transform = "scale(1)";
+                                        target.style.boxShadow = "none";
+                                    }
+                                }}
+                                >
+                                    {userAnswer.accepted && (
+                                        <div style={{
+                                            position: "absolute",
+                                            top: "0.5rem",
+                                            right: "0.5rem",
+                                            color: "rgba(0, 255, 0, 0.9)",
+                                            fontSize: "1.2rem",
+                                            fontWeight: "bold"
+                                        }}>
+                                            ✓
+                                        </div>
+                                    )}
                                     <div style={{
-                                        color: "rgba(0, 255, 170, 0.9)",
+                                        color: userAnswer.accepted ? "rgba(0, 255, 0, 0.9)" : "rgba(0, 255, 170, 0.9)",
                                         fontSize: "1rem",
                                         fontWeight: "600",
                                         marginBottom: "0.5rem"
@@ -111,6 +145,16 @@ function FreeText({data, timer, sendMessage, showCorrectAnswer, correctAnswer, a
                                     }}>
                                         {userAnswer.answer}
                                     </div>
+                                    {isAdmin && !userAnswer.accepted && (
+                                        <div style={{
+                                            marginTop: "0.5rem",
+                                            fontSize: "0.8rem",
+                                            color: "rgba(255, 255, 255, 0.6)",
+                                            fontStyle: "italic"
+                                        }}>
+                                            Click to accept and award points
+                                        </div>
+                                    )}
                                 </div>
                             ))}
                         </div>

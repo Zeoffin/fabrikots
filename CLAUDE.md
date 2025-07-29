@@ -114,3 +114,7 @@ python manage.py migrate
 - Check Redis connection in Django settings
 - Verify WebSocket URL in `frontend/WebSockets.tsx`
 - Monitor WebSocket messages in browser developer tools
+
+## Development Environment
+
+- Always use the venv located in the directory.

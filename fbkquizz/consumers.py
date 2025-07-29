@@ -67,6 +67,18 @@ class QuizzConsumer(AsyncWebsocketConsumer):
         if "answer" in received_msg:
             await self.save_user_answer(received_msg["answer"])
             response["type"] = "answer_saved"
+            
+        if "accept_answer" in received_msg:
+            # Only allow admin to accept answers
+            if self.user.username == "markuss":
+                accept_data = received_msg["accept_answer"]
+                success = await self.accept_user_answer(accept_data["username"], accept_data["question_id"])
+                if success:
+                    all_user_points = await self.get_all_user_points()
+                    response["type"] = "answer_accepted"
+                    response["accepted_username"] = accept_data["username"]
+                    response["question_id"] = accept_data["question_id"]
+                    response["user_points"] = all_user_points
 
         print("RESPONSE SENT")
         print(response)
@@ -116,6 +128,19 @@ class QuizzConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             "status": status,
             "type": "answer_saved"
+        }))
+
+    async def answer_accepted(self, event):
+        status = event["status"]
+        accepted_username = event["accepted_username"]
+        question_id = event["question_id"]
+        user_points = event["user_points"]
+        await self.send(text_data=json.dumps({
+            "status": status,
+            "type": "answer_accepted",
+            "accepted_username": accepted_username,
+            "question_id": question_id,
+            "user_points": user_points
         }))
 
     # ================= Operations ===============
@@ -325,9 +350,35 @@ class QuizzConsumer(AsyncWebsocketConsumer):
         for user_setting in users_with_answers:
             answer = user_setting.answers.get(str(current_question_id))
             if answer and str(answer).strip():  # Only include non-empty answers
+                is_accepted = user_setting.accepted_answers.get(str(current_question_id), False) if user_setting.accepted_answers else False
                 user_answers.append({
                     'username': user_setting.user.username,
-                    'answer': answer
+                    'answer': answer,
+                    'accepted': is_accepted
                 })
         
         return user_answers
+
+    @database_sync_to_async
+    def accept_user_answer(self, username, question_id):
+        try:
+            user = User.objects.get(username=username)
+            user_setting = UserSettings.objects.get(user=user)
+            question = Question.objects.get(id=question_id)
+            
+            # Initialize accepted_answers if not exists
+            if not user_setting.accepted_answers:
+                user_setting.accepted_answers = {}
+            
+            # Check if answer was already accepted
+            if str(question_id) in user_setting.accepted_answers:
+                return False
+            
+            # Mark answer as accepted and award points
+            user_setting.accepted_answers[str(question_id)] = True
+            user_setting.points += question.points
+            user_setting.save()
+            
+            return True
+        except (User.DoesNotExist, UserSettings.DoesNotExist, Question.DoesNotExist):
+            return False

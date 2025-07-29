@@ -44,6 +44,7 @@ class UserSettings(models.Model):
     active = models.BooleanField()
     points = models.IntegerField(default=0)
     answers = models.JSONField(default=dict, blank=True)
+    accepted_answers = models.JSONField(default=dict, blank=True)  # Track admin-accepted answers
 
     def __str__(self):
         return f"{self.user.username}"

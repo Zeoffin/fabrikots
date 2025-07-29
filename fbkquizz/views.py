@@ -88,5 +88,54 @@ class Questions(APIView):
     #     return Response({"new_question": next_question}, status=status.HTTP_200_OK)
 
 
+class AcceptAnswer(APIView):
+    permission_classes = (permissions.IsAuthenticated,)
+    authentication_classes = (SessionAuthentication,)
+
+    def post(self, request):
+        # Only allow admin (markuss) to accept answers
+        if request.user.username != "markuss":
+            return Response({"error": "Not authorized"}, status=status.HTTP_403_FORBIDDEN)
+        
+        username = request.data.get("username")
+        question_id = request.data.get("question_id")
+        
+        if not username or not question_id:
+            return Response({"error": "Username and question_id required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            user = UserModel.objects.get(username=username)
+            user_setting = UserSettings.objects.get(user=user)
+            question = Question.objects.get(id=question_id)
+            
+            # Initialize accepted_answers if not exists
+            if not user_setting.accepted_answers:
+                user_setting.accepted_answers = {}
+            
+            # Check if answer was already accepted
+            if str(question_id) in user_setting.accepted_answers:
+                return Response({"error": "Answer already accepted"}, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Mark answer as accepted and award points
+            user_setting.accepted_answers[str(question_id)] = True
+            user_setting.points += question.points
+            user_setting.save()
+            
+            return Response({
+                "success": True,
+                "username": username,
+                "question_id": question_id,
+                "points_awarded": question.points,
+                "new_total_points": user_setting.points
+            }, status=status.HTTP_200_OK)
+            
+        except UserModel.DoesNotExist:
+            return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+        except UserSettings.DoesNotExist:
+            return Response({"error": "User settings not found"}, status=status.HTTP_404_NOT_FOUND)
+        except Question.DoesNotExist:
+            return Response({"error": "Question not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
 def landing_page(request):
     return render(request, "fabrikots/index.html")
