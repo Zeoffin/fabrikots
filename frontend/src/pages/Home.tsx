@@ -10,6 +10,7 @@ import Info from "../questions/Info.tsx";
 import {pointsSocket} from "../../WebSockets.tsx";
 import MultipleChoice from "../questions/MultipleChoice.tsx";
 import FreeText from "../questions/FreeText.tsx";
+import UserChoice from "../questions/UserChoice.tsx";
 
 interface Props {
     isAdmin: boolean
@@ -36,6 +37,7 @@ function Home({isAdmin}: Props) {
     const [correctAnswer, setCorrectAnswer] = useState(null);
     const [timerStarted, setTimerStarted] = useState(false);
     const [allUserAnswers, setAllUserAnswers] = useState(null);
+    const [voteResults, setVoteResults] = useState(null);
     const {sendMessage, lastMessage, readyState} = useWebSocket(pointsSocket);
 
 
@@ -59,6 +61,7 @@ function Home({isAdmin}: Props) {
                 setCorrectAnswer(null);
                 setTimerStarted(false);
                 setAllUserAnswers(null);
+                setVoteResults(null);
             }
 
             if ("timer" in messageData) {
@@ -73,6 +76,9 @@ function Home({isAdmin}: Props) {
                 setCorrectAnswer(messageData["correct_answer"]);
                 if (messageData["question_type"] === "freeText" && messageData["all_user_answers"]) {
                     setAllUserAnswers(messageData["all_user_answers"]);
+                }
+                if (messageData["question_type"] === "userChoice" && messageData["vote_results"]) {
+                    setVoteResults(messageData["vote_results"]);
                 }
             }
 
@@ -210,6 +216,40 @@ function Home({isAdmin}: Props) {
         }
     }
 
+    const renderAdminInfo = () => {
+        if (isAdmin && data && data["notes"]) {
+            return (
+                <div style={{
+                    position: "fixed",
+                    bottom: "20px",
+                    left: "20px",
+                    backgroundColor: "rgba(0, 0, 0, 0.8)",
+                    color: "rgba(255, 255, 255, 0.9)",
+                    padding: "12px 16px",
+                    borderRadius: "8px",
+                    border: "1px solid rgba(0, 255, 170, 0.3)",
+                    maxWidth: "300px",
+                    fontSize: "0.9rem",
+                    lineHeight: "1.4",
+                    zIndex: 1000,
+                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)"
+                }}>
+                    <div style={{
+                        color: "rgba(0, 255, 170, 0.9)",
+                        fontSize: "0.8rem",
+                        fontWeight: "600",
+                        textTransform: "uppercase",
+                        letterSpacing: "1px",
+                        marginBottom: "6px"
+                    }}>
+                        Admin Info
+                    </div>
+                    {data["notes"]}
+                </div>
+            )
+        }
+    }
+
     const renderQuestion = () => {
         if (!timerStarted) {
             return (
@@ -257,6 +297,16 @@ function Home({isAdmin}: Props) {
                     allUserAnswers={allUserAnswers}
                     isAdmin={isAdmin}
                     onAcceptAnswer={acceptAnswer}
+                />
+
+            case "userChoice":
+                return <UserChoice 
+                    data={data} 
+                    timer={timer} 
+                    sendMessage={sendMessage}
+                    showCorrectAnswer={showCorrectAnswer}
+                    correctAnswer={correctAnswer}
+                    voteResults={voteResults}
                 />
 
         }
@@ -373,6 +423,8 @@ function Home({isAdmin}: Props) {
                     <UserPoints lastMessage={lastMessage} sendMessage={sendMessage} readyState={readyState}
                                 isStaff={isAdmin}/>
                 </Grid>
+
+                {renderAdminInfo()}
 
             </Grid>
 

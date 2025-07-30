@@ -13,7 +13,8 @@ class Question(models.Model):
     TYPES = (
         ("info", "info"),
         ("multipleChoice", "multipleChoice"),
-        ("freeText", "freeText")
+        ("freeText", "freeText"),
+        ("userChoice", "userChoice")
     )
 
     title = models.CharField(max_length=60, blank=True)

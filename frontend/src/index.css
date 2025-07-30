@@ -118,7 +118,7 @@ h1 {
     font-size: 4rem;
     font-weight: 900;
     letter-spacing: 12px;
-    margin: 2rem 0;
+    margin: 2rem 0 1rem 0;
     color: #ffffff;
     text-shadow: 
         0 0 5px rgba(255, 255, 255, 0.8),
@@ -127,6 +127,21 @@ h1 {
         0 0 40px rgba(0, 255, 170, 0.6),
         0 0 80px rgba(0, 255, 170, 0.4);
     animation: flicker-enhanced 8s 2s infinite normal;
+}
+
+.neon-text-year {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: 8px;
+    margin: 0 0 2rem 0;
+    color: rgba(255, 255, 255, 0.8);
+    text-shadow: 
+        0 0 3px rgba(255, 255, 255, 0.6),
+        0 0 6px rgba(255, 255, 255, 0.4),
+        0 0 12px rgba(0, 255, 170, 0.6),
+        0 0 24px rgba(0, 255, 170, 0.4);
+    animation: pulse-neon-subtle 3s ease-in-out infinite alternate;
+    text-align: center;
 }
 
 @keyframes flicker-enhanced {
@@ -179,6 +194,25 @@ h1 {
             0 0 30px rgba(0, 255, 170, 1),
             0 0 60px rgba(0, 255, 170, 0.8),
             0 0 100px rgba(0, 255, 170, 0.6);
+    }
+}
+
+@keyframes pulse-neon-subtle {
+    from {
+        text-shadow: 
+            0 0 3px rgba(255, 255, 255, 0.6),
+            0 0 6px rgba(255, 255, 255, 0.4),
+            0 0 12px rgba(0, 255, 170, 0.6),
+            0 0 24px rgba(0, 255, 170, 0.4);
+        opacity: 0.8;
+    }
+    to {
+        text-shadow: 
+            0 0 5px rgba(255, 255, 255, 0.8),
+            0 0 10px rgba(255, 255, 255, 0.6),
+            0 0 18px rgba(0, 255, 170, 0.8),
+            0 0 36px rgba(0, 255, 170, 0.6);
+        opacity: 1;
     }
 }
 
@@ -260,16 +294,16 @@ h1 {
 .answer-button {
     background: rgba(255, 255, 255, 0.08);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 16px;
+    border-radius: 12px;
     color: white;
-    padding: 16px 24px;
-    font-size: 18px;
+    padding: 8px 16px;
+    font-size: 14px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
     backdrop-filter: blur(10px);
-    margin: 8px;
-    min-width: 200px;
+    margin: 4px;
+    min-width: 150px;
     text-align: center;
 }
 

@@ -76,10 +76,11 @@ function MultipleChoice({data, timer, sendMessage, showCorrectAnswer, correctAns
             )}
 
             <div style={{
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                gap: "1rem"
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                gap: "0.5rem",
+                maxWidth: "800px",
+                margin: "0 auto"
             }}>
                 {
                     Object.entries(answers).map((answer, idx) => {
@@ -98,11 +99,7 @@ function MultipleChoice({data, timer, sendMessage, showCorrectAnswer, correctAns
                                 key={idx}
                                 className={buttonClass}
                                 disabled={timer === 0 || timer === 30 || showCorrectAnswer}
-                                onClick={event => {choseAnswer(event, idx)}}
-                                style={{
-                                    maxWidth: "500px",
-                                    width: "100%"
-                                }}>
+                                onClick={event => {choseAnswer(event, idx)}}>
                                 {answer[1]}
                                 {showCorrectAnswer && correctAnswer === idx.toString() && 
                                     <span style={{marginLeft: "10px", color: "#00ff00"}}>✓</span>

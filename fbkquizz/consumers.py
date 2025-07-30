@@ -113,6 +113,7 @@ class QuizzConsumer(AsyncWebsocketConsumer):
         correct_answer = event["correct_answer"]
         user_points = event["user_points"]
         all_user_answers = event.get("all_user_answers")
+        vote_results = event.get("vote_results")
         question_type = event.get("question_type")
         await self.send(text_data=json.dumps({
             "status": status,
@@ -120,6 +121,7 @@ class QuizzConsumer(AsyncWebsocketConsumer):
             "correct_answer": correct_answer,
             "user_points": user_points,
             "all_user_answers": all_user_answers,
+            "vote_results": vote_results,
             "question_type": question_type
         }))
 
@@ -161,6 +163,7 @@ class QuizzConsumer(AsyncWebsocketConsumer):
             all_user_points = await self.get_all_user_points()
             current_question_type = await self.get_current_question_type()
             all_user_answers = await self.get_all_user_answers() if current_question_type == "freeText" else None
+            vote_results = await self.get_vote_results() if current_question_type == "userChoice" else None
             
             await self.channel_layer.group_send(
                 self.room_group_name, {
@@ -168,6 +171,7 @@ class QuizzConsumer(AsyncWebsocketConsumer):
                     "correct_answer": correct_answer,
                     "user_points": all_user_points,
                     "all_user_answers": all_user_answers,
+                    "vote_results": vote_results,
                     "question_type": current_question_type,
                     "status": "success"
                 }
@@ -243,8 +247,8 @@ class QuizzConsumer(AsyncWebsocketConsumer):
         if not user_setting.answers:
             user_setting.answers = {}
         
-        # Handle different answer formats: selected_answer (multiple choice) or text_answer (free text)
-        answer = answer_data.get("selected_answer") if "selected_answer" in answer_data else answer_data.get("text_answer")
+        # Handle different answer formats: selected_answer (multiple choice), text_answer (free text), or selected_user (userChoice)
+        answer = answer_data.get("selected_answer") if "selected_answer" in answer_data else answer_data.get("text_answer") if "text_answer" in answer_data else answer_data.get("selected_user")
         
         # Save the answer (empty answers will be saved as empty string for proper point deduction)
         # Use 'is not None' to handle case where selected_answer is 0 (first option)
@@ -308,6 +312,10 @@ class QuizzConsumer(AsyncWebsocketConsumer):
                         user_setting.points -= 1
                         user_setting.save()
                         print(f"Subtracted 1 point from {user_setting.user.username} for not answering (was {old_points}, now {user_setting.points})")
+
+            elif current_question.type == "info":
+                print("Info Q type, not allocating any points")
+
             else:
                 # Original logic for non-freeText questions
                 for user_setting in users_with_answers:
@@ -383,3 +391,24 @@ class QuizzConsumer(AsyncWebsocketConsumer):
             return True
         except (User.DoesNotExist, UserSettings.DoesNotExist, Question.DoesNotExist):
             return False
+
+    @database_sync_to_async
+    def get_vote_results(self):
+        current_question_id = GlobalSettings.objects.get(id=1).currentQuestion.id
+        vote_counts = {}
+        
+        # Get all user answers for the current question
+        users_with_answers = UserSettings.objects.filter(
+            answers__has_key=str(current_question_id)
+        ).select_related('user')
+        
+        for user_setting in users_with_answers:
+            # Skip admin user
+            if user_setting.user.username == "markuss":
+                continue
+                
+            voted_for = user_setting.answers.get(str(current_question_id))
+            if voted_for and str(voted_for).strip():
+                vote_counts[voted_for] = vote_counts.get(voted_for, 0) + 1
+        
+        return vote_counts

@@ -1,5 +1,5 @@
 import {Box, Button, Grid} from "@mui/material";
-import {useEffect, useState, useCallback} from "react";
+import {useEffect, useState, useCallback, useRef} from "react";
 import axiosInstance from "../AxiosInstance.tsx";
 import Form from "react-bootstrap/Form";
 import useWebSocket, {ReadyState} from "react-use-websocket";
@@ -23,6 +23,33 @@ interface Props {
 function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
 
     const [userPoints, setUserPoints] = useState(noUsers);
+    const [pointGlows, setPointGlows] = useState<{[key: string]: 'increase' | 'decrease' | null}>({});
+    const previousPointsRef = useRef<{[key: string]: number}>({});
+
+    const updatePointsWithGlow = (newPointsData: any) => {
+        const newGlows: {[key: string]: 'increase' | 'decrease' | null} = {};
+        
+        Object.keys(newPointsData.response).forEach(username => {
+            const newPoints = newPointsData.response[username].points;
+            const oldPoints = previousPointsRef.current[username];
+            
+            if (oldPoints !== undefined && newPoints !== oldPoints) {
+                newGlows[username] = newPoints > oldPoints ? 'increase' : 'decrease';
+                
+                setTimeout(() => {
+                    setPointGlows(prev => ({...prev, [username]: null}));
+                }, 1000);
+            }
+        });
+        
+        previousPointsRef.current = Object.keys(newPointsData.response).reduce((acc, username) => {
+            acc[username] = newPointsData.response[username].points;
+            return acc;
+        }, {} as {[key: string]: number});
+        
+        setPointGlows(newGlows);
+        setUserPoints(newPointsData);
+    };
 
     useEffect(() => {
 
@@ -30,7 +57,7 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
             const messageData = JSON.parse(lastMessage["data"]);
             if ("points" in messageData && messageData["user_points"]) {
                 // Update points directly from WebSocket message for manual changes
-                setUserPoints({
+                updatePointsWithGlow({
                     response: messageData["user_points"]
                 });
             } else if ("points" in messageData) {
@@ -38,12 +65,12 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
                 getGameInfo();
             } else if (messageData["type"] === "timer_ended" && messageData["user_points"]) {
                 // Update points directly from WebSocket message for timer end
-                setUserPoints({
+                updatePointsWithGlow({
                     response: messageData["user_points"]
                 });
             } else if (messageData["type"] === "answer_accepted" && messageData["user_points"]) {
                 // Update points directly from WebSocket message when answers are accepted
-                setUserPoints({
+                updatePointsWithGlow({
                     response: messageData["user_points"]
                 });
             }
@@ -58,7 +85,7 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
             .then(function (res) {
                 // console.log("NEW GAME INFO:");
                 // console.log(res.data);
-                setUserPoints(res.data);
+                updatePointsWithGlow(res.data);
             })
             .catch(function (error) {
                 console.log(error);
@@ -157,7 +184,14 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
                                 textAlign: 'center',
                                 background: 'rgba(0, 255, 170, 0.1)',
                                 padding: '2px 4px',
-                                borderRadius: '4px'
+                                borderRadius: '4px',
+                                transition: 'all 0.3s ease',
+                                boxShadow: pointGlows[key] === 'increase' 
+                                    ? '0 0 15px rgba(0, 255, 170, 0.8), 0 0 25px rgba(0, 255, 170, 0.5)' 
+                                    : pointGlows[key] === 'decrease' 
+                                    ? '0 0 15px rgba(255, 75, 87, 0.8), 0 0 25px rgba(255, 75, 87, 0.5)' 
+                                    : 'none',
+                                transform: pointGlows[key] ? 'scale(1.1)' : 'scale(1)'
                             }}>
                                 {userPoints.response[key]['points']}
                             </div>
@@ -209,7 +243,23 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
                             </Grid>
 
                             <Grid item xs={2}>
-                                {userPoints.response[key]['points']}
+                                <span style={{
+                                    transition: 'all 0.3s ease',
+                                    display: 'inline-block',
+                                    textShadow: pointGlows[key] === 'increase' 
+                                        ? '0 0 10px rgba(0, 255, 170, 0.8), 0 0 20px rgba(0, 255, 170, 0.5)' 
+                                        : pointGlows[key] === 'decrease' 
+                                        ? '0 0 10px rgba(255, 75, 87, 0.8), 0 0 20px rgba(255, 75, 87, 0.5)' 
+                                        : 'none',
+                                    transform: pointGlows[key] ? 'scale(1.1)' : 'scale(1)',
+                                    color: pointGlows[key] === 'increase' 
+                                        ? 'rgba(0, 255, 170, 1)' 
+                                        : pointGlows[key] === 'decrease' 
+                                        ? 'rgba(255, 75, 87, 1)' 
+                                        : 'inherit'
+                                }}>
+                                    {userPoints.response[key]['points']}
+                                </span>
                             </Grid>
 
                         </Grid>

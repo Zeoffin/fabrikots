@@ -36,6 +36,7 @@ function Join({handleState}: Props) {
         return (
             <>
                 <div className={"neon-text-flicker"}>FABRIKOTS</div>
+                <div className={"neon-text-year"}>2025</div>
                 <div className="join-form">
                     <p style={{color: "red"}} hidden={status}>Nepareizi ierakstīji</p>
                     <Form onSubmit={e => submitLogin(e)}>
