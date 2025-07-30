@@ -36,6 +36,7 @@ class GlobalSettings(models.Model):
     # Model that stores current question / trivia (order, id? )
     currentQuestion = models.ForeignKey(Question, default=None, on_delete=models.CASCADE)
     timer = models.IntegerField(default=30)
+    current_round = models.IntegerField(default=1)  # Track current quiz round for muting functionality
 
     def __str__(self):
         return f"{self.id}"
@@ -47,6 +48,7 @@ class UserSettings(models.Model):
     points = models.IntegerField(default=0)
     answers = models.JSONField(default=dict, blank=True)
     accepted_answers = models.JSONField(default=dict, blank=True)  # Track admin-accepted answers
+    muted_until_round = models.IntegerField(default=0)  # 0 means not muted, positive number means muted until that round count
 
     def __str__(self):
         return f"{self.user.username}"

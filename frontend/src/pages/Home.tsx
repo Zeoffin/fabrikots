@@ -11,6 +11,8 @@ import {pointsSocket} from "../../WebSockets.tsx";
 import MultipleChoice from "../questions/MultipleChoice.tsx";
 import FreeText from "../questions/FreeText.tsx";
 import UserChoice from "../questions/UserChoice.tsx";
+import WheelSpin from "../components/WheelSpin.tsx";
+import WheelDisplay from "../components/WheelDisplay.tsx";
 
 interface Props {
     isAdmin: boolean
@@ -40,6 +42,7 @@ function Home({isAdmin}: Props) {
     const [voteResults, setVoteResults] = useState(null);
     const [detailedVoteResults, setDetailedVoteResults] = useState(null);
     const [multipleChoiceResults, setMultipleChoiceResults] = useState(null);
+    const [userPoints, setUserPoints] = useState(null);
     const {sendMessage, lastMessage, readyState} = useWebSocket(pointsSocket);
 
 
@@ -105,6 +108,18 @@ function Home({isAdmin}: Props) {
                 }
             }
 
+            if (messageData["type"] === "wheelspin_result") {
+                // Update user points after wheelspin action
+                if (messageData["user_points"]) {
+                    setUserPoints({ response: messageData["user_points"] });
+                }
+            }
+
+            // Update userPoints from various message types
+            if (messageData["user_points"]) {
+                setUserPoints({ response: messageData["user_points"] });
+            }
+
         }
 
     }, [lastMessage]);
@@ -113,6 +128,19 @@ function Home({isAdmin}: Props) {
         if (!data) {
             getQuestion();
         }
+        if (!userPoints && isAdmin) {
+            getUserPoints();
+        }
+    }
+
+    const getUserPoints = () => {
+        axiosInstance.get("/game-info")
+            .then(function (res) {
+                setUserPoints(res.data);
+            })
+            .catch(function (error) {
+                console.log("Error fetching user points:", error);
+            });
     }
 
     // ===================================================================================          Timer
@@ -172,6 +200,11 @@ function Home({isAdmin}: Props) {
     // ===================================================================================      RENDER STUFF
 
     const renderTimer = () => {
+        // Don't show timer for info questions with time = -1
+        if (data["type"] === "info" && data["time"] === -1) {
+            return null;
+        }
+
         if (timer || timer === 0) {
             let timerClass = "timer-display ";
             
@@ -261,6 +294,11 @@ function Home({isAdmin}: Props) {
     }
 
     const renderQuestion = () => {
+        // For info questions with time = -1, show the info immediately
+        if (data["type"] === "info" && data["time"] === -1) {
+            return <Info data={data}/>
+        }
+
         if (!timerStarted) {
             return (
                 <div style={{
@@ -437,6 +475,17 @@ function Home({isAdmin}: Props) {
                 </Grid>
 
                 {renderAdminInfo()}
+
+                {isAdmin && userPoints && (
+                    <WheelSpin 
+                        userPoints={userPoints} 
+                        sendMessage={sendMessage} 
+                        readyState={readyState}
+                        lastMessage={lastMessage}
+                    />
+                )}
+
+                <WheelDisplay lastMessage={lastMessage} />
 
             </Grid>
 

@@ -55,14 +55,27 @@ class QuizzConsumer(AsyncWebsocketConsumer):
 
         if "direction" in received_msg:
             await self.change_question(received_msg["direction"])
-            await self.set_timer(self.TIMER)
+            current_question_time = await self.get_current_question_time()
+            if current_question_time == -1:
+                await self.set_timer(-1)
+                response["timer"] = -1
+            else:
+                await self.set_timer(current_question_time)
+                response["timer"] = current_question_time
             response["type"] = "direction"
             response["direction"] = received_msg["direction"]
-            response["timer"] = self.TIMER
 
         if "start_timer" in received_msg:
-            response["type"] = "start_timer"
-            response["timer"] = self.TIMER
+            current_question_time = await self.get_current_question_time()
+            current_question_type = await self.get_current_question_type()
+            
+            # Don't start timer for info questions with time = -1
+            if current_question_type == "info" and current_question_time == -1:
+                response["type"] = "timer_skipped"
+                response["timer"] = -1
+            else:
+                response["type"] = "start_timer"
+                response["timer"] = current_question_time
 
         if "answer" in received_msg:
             await self.save_user_answer(received_msg["answer"])
@@ -80,13 +93,86 @@ class QuizzConsumer(AsyncWebsocketConsumer):
                     response["question_id"] = accept_data["question_id"]
                     response["user_points"] = all_user_points
 
+        if "wheelspin" in received_msg:
+            # Only allow admin to trigger wheelspins
+            if self.user.username == "markuss":
+                wheelspin_data = received_msg["wheelspin"]
+                target_user = wheelspin_data["target_user"]
+                action = wheelspin_data["action"]
+                amount = wheelspin_data.get("amount", 0)
+                other_user = wheelspin_data.get("other_user", "")
+                
+                # success = await self.process_wheelspin_action(target_user, action, amount, other_user)
+                # if success:
+                #     all_user_points = await self.get_all_user_points()
+                #     response["type"] = "wheelspin_result"
+                #     response["target_user"] = target_user
+                #     response["action"] = action
+                #     response["amount"] = amount
+                #     response["other_user"] = other_user
+                #     response["user_points"] = all_user_points
+
+        if "wheelspin_start" in received_msg:
+            # Only allow admin to start wheelspins - this shows the wheel to everyone
+            if self.user.username == "markuss":
+                import random
+                wheelspin_start_data = received_msg["wheelspin_start"]
+                
+                # Define wheel actions on server side (must match frontend)
+                def get_random_hsl():
+                    import random
+                    hue = random.randint(0, 360)
+                    saturation = random.randint(1, 100)
+                    lightness = random.randint(1, 100)
+                    return f"hsl({hue}, {saturation}%, {lightness}%)"
+                
+                wheel_actions = [
+                    {"id": "mute_3_rounds", "label": "Tev mute on discord for 3 rounds", "color": get_random_hsl()},
+                    {"id": "mute_3_rounds", "label": "Kādam citam mute on discord uz 4 rounds", "color": get_random_hsl()},
+                    {"id": "no_effect", "label": "Nu neko nedabūji", "color": get_random_hsl()},
+                    {"id": "add_5_points", "label": "+5 punkti", "color": get_random_hsl()},
+                    {"id": "add_5_points", "label": "+1 punkti", "color": get_random_hsl()},
+                    {"id": "add_5_points", "label": "+3 punkti", "color": get_random_hsl()},
+                    {"id": "remove_1_point", "label": "-1 punkts", "color": get_random_hsl()},
+                    {"id": "remove_10_point", "label": "-10 punkti", "color": get_random_hsl()},
+                    {"id": "remove_3_point", "label": "-3 punkti", "color": get_random_hsl()},
+                    {"id": "swap_points", "label": "Punktu Maiņa", "color": get_random_hsl()},
+                    {"id": "no_effect", "label": "Nu neko nedabūji", "color": get_random_hsl()}
+                ]
+                
+                # Server determines the result
+                selected_action_index = random.randint(0, len(wheel_actions) - 1)
+                selected_action = wheel_actions[selected_action_index]
+                
+                # Calculate precise rotation to land on the selected section
+                base_rotations = 5 + random.random() * 3  # 5-8 full rotations for good visual effect
+                angle_per_section = (2 * 3.14159) / len(wheel_actions)
+                
+                # Calculate the center angle of the target section
+                # The wheel is drawn starting from index 0, and the pointer points up (top)
+                target_angle = selected_action_index * angle_per_section + (angle_per_section / 2)
+                
+                # Final rotation = base rotations + adjustment to land on target
+                # We need to subtract the target angle because the wheel rotates clockwise
+                final_rotation = (base_rotations * 2 * 3.14159) - target_angle
+                
+                # Add the selected action index for frontend to verify
+                response["selected_action_index"] = selected_action_index
+                
+                response["type"] = "wheelspin_start"
+                response["target_user"] = wheelspin_start_data["target_user"]
+                response["final_rotation"] = final_rotation
+                response["selected_action"] = selected_action
+                response["spin_duration"] = 3000
+
         print("RESPONSE SENT")
         print(response)
 
-        # Send message to room group
-        await self.channel_layer.group_send(
-            self.room_group_name, response
-        )
+        # Only send message to room group if there's a valid type
+        if "type" in response:
+            await self.channel_layer.group_send(
+                self.room_group_name, response
+            )
 
     # ================  TYPES ==============
     async def direction(self, event):
@@ -149,12 +235,57 @@ class QuizzConsumer(AsyncWebsocketConsumer):
             "user_points": user_points
         }))
 
+    async def wheelspin_result(self, event):
+        status = event["status"]
+        target_user = event["target_user"]
+        action = event["action"]
+        amount = event["amount"]
+        other_user = event["other_user"]
+        user_points = event["user_points"]
+        await self.send(text_data=json.dumps({
+            "status": status,
+            "type": "wheelspin_result",
+            "target_user": target_user,
+            "action": action,
+            "amount": amount,
+            "other_user": other_user,
+            "user_points": user_points
+        }))
+
+    async def wheelspin_start(self, event):
+        status = event["status"]
+        target_user = event["target_user"]
+        final_rotation = event["final_rotation"]
+        selected_action = event["selected_action"]
+        spin_duration = event["spin_duration"]
+        selected_action_index = event.get("selected_action_index", 0)
+        await self.send(text_data=json.dumps({
+            "status": status,
+            "type": "wheelspin_start",
+            "target_user": target_user,
+            "final_rotation": final_rotation,
+            "selected_action": selected_action,
+            "spin_duration": spin_duration,
+            "selected_action_index": selected_action_index
+        }))
+
     # ================= Operations ===============
 
     async def thread_start_timer(self):
-        if self.TIMER > 0:
-            print("Starting timer...")
-            for i in reversed(range(0, self.TIMER+1)):
+        current_question_time = await self.get_current_question_time()
+        current_question_type = await self.get_current_question_type()
+        
+        # Skip timer for info questions with time = -1
+        if current_question_type == "info" and current_question_time == -1:
+            print("Skipping timer for info question with time = -1")
+            return
+            
+        # timer_duration = current_question_time if current_question_time > 0 else self.TIMER
+        timer_duration = self.TIMER
+        
+        if timer_duration > 0:
+            print(f"Starting timer for {timer_duration} seconds...")
+            for i in reversed(range(0, timer_duration+1)):
                 await self.set_timer(i)
                 await self.send(text_data=json.dumps({"timer": i}))
                 # self.channel_layer.group_send(
@@ -165,7 +296,6 @@ class QuizzConsumer(AsyncWebsocketConsumer):
             await self.allocate_points_and_finish()
             correct_answer = await self.get_current_question_correct_answer()
             all_user_points = await self.get_all_user_points()
-            current_question_type = await self.get_current_question_type()
             all_user_answers = await self.get_all_user_answers() if current_question_type == "freeText" else None
             vote_results = await self.get_vote_results() if current_question_type == "userChoice" else None
             detailed_vote_results = await self.get_detailed_vote_results() if current_question_type == "userChoice" else None
@@ -356,6 +486,11 @@ class QuizzConsumer(AsyncWebsocketConsumer):
         return current_question.type
 
     @database_sync_to_async
+    def get_current_question_time(self):
+        current_question = GlobalSettings.objects.get(id=1).currentQuestion
+        return current_question.time
+
+    @database_sync_to_async
     def get_all_user_answers(self):
         current_question_id = GlobalSettings.objects.get(id=1).currentQuestion.id
         user_answers = []
@@ -469,3 +604,67 @@ class QuizzConsumer(AsyncWebsocketConsumer):
                 choice_results[choice_key].append(user_setting.user.username)
         
         return choice_results
+
+    @database_sync_to_async
+    def process_wheelspin_action(self, target_user, action, amount, other_user):
+        """Process wheelspin actions on users"""
+        try:
+            target_user_obj = User.objects.get(username=target_user)
+            target_settings = UserSettings.objects.get(user=target_user_obj)
+            current_round = GlobalSettings.objects.get(id=1).current_round
+            
+            if action == "add_points":
+                target_settings.points += amount
+                target_settings.save()
+            
+            elif action == "remove_points":
+                target_settings.points = max(0, target_settings.points - amount)
+                target_settings.save()
+            
+            elif action == "spin_again":
+                # This is handled on the frontend
+                pass
+            
+            elif action == "swap_points":
+                if other_user:
+                    other_user_obj = User.objects.get(username=other_user)
+                    other_settings = UserSettings.objects.get(user=other_user_obj)
+                    
+                    # Swap points
+                    temp_points = target_settings.points
+                    target_settings.points = other_settings.points
+                    other_settings.points = temp_points
+                    
+                    target_settings.save()
+                    other_settings.save()
+            
+            elif action == "mute_1_round":
+                target_settings.muted_until_round = current_round + 1
+                target_settings.save()
+            
+            elif action == "mute_3_rounds":
+                target_settings.muted_until_round = current_round + 3
+                target_settings.save()
+            
+            elif action == "add_points_other":
+                if other_user:
+                    other_user_obj = User.objects.get(username=other_user)
+                    other_settings = UserSettings.objects.get(user=other_user_obj)
+                    other_settings.points += amount
+                    other_settings.save()
+            
+            elif action == "remove_points_other":
+                if other_user:
+                    other_user_obj = User.objects.get(username=other_user)
+                    other_settings = UserSettings.objects.get(user=other_user_obj)
+                    other_settings.points = max(0, other_settings.points - amount)
+                    other_settings.save()
+            
+            elif action == "no_effect":
+                # Lucky! No effect - do nothing
+                pass
+            
+            return True
+            
+        except (User.DoesNotExist, UserSettings.DoesNotExist):
+            return False

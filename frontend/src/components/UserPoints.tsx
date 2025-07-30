@@ -73,6 +73,11 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
                 updatePointsWithGlow({
                     response: messageData["user_points"]
                 });
+            } else if (messageData["type"] === "wheelspin_result" && messageData["user_points"]) {
+                // Update points directly from WebSocket message when wheelspin actions are executed
+                updatePointsWithGlow({
+                    response: messageData["user_points"]
+                });
             }
         } else if (userPoints === noUsers) {
             getGameInfo();
