@@ -8,13 +8,9 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fabrikots.sqlite3" beforeDir="false" afterPath="$PROJECT_DIR$/fabrikots.sqlite3" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/fbkquizz/consumers.py" beforeDir="false" afterPath="$PROJECT_DIR$/fbkquizz/consumers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fbkquizz/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/fbkquizz/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/fbkquizz/views.py" beforeDir="false" afterPath="$PROJECT_DIR$/fbkquizz/views.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/components/UserPoints.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/components/UserPoints.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/index.css" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/index.css" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/pages/Home.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Home.tsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/frontend/src/pages/Join.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/pages/Join.tsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/frontend/src/questions/MultipleChoice.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/questions/MultipleChoice.tsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/frontend/src/questions/UserChoice.tsx" beforeDir="false" afterPath="$PROJECT_DIR$/frontend/src/questions/UserChoice.tsx" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -122,6 +118,7 @@
       <workItem from="1750836590674" duration="2191000" />
       <workItem from="1753711311498" duration="5776000" />
       <workItem from="1753775844784" duration="5845000" />
+      <workItem from="1753864163993" duration="4392000" />
     </task>
     <servers />
   </component>

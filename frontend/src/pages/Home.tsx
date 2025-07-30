@@ -38,6 +38,8 @@ function Home({isAdmin}: Props) {
     const [timerStarted, setTimerStarted] = useState(false);
     const [allUserAnswers, setAllUserAnswers] = useState(null);
     const [voteResults, setVoteResults] = useState(null);
+    const [detailedVoteResults, setDetailedVoteResults] = useState(null);
+    const [multipleChoiceResults, setMultipleChoiceResults] = useState(null);
     const {sendMessage, lastMessage, readyState} = useWebSocket(pointsSocket);
 
 
@@ -62,6 +64,8 @@ function Home({isAdmin}: Props) {
                 setTimerStarted(false);
                 setAllUserAnswers(null);
                 setVoteResults(null);
+                setDetailedVoteResults(null);
+                setMultipleChoiceResults(null);
             }
 
             if ("timer" in messageData) {
@@ -72,13 +76,19 @@ function Home({isAdmin}: Props) {
             }
 
             if (messageData["type"] === "timer_ended") {
-                setShowCorrectAnswer(true);
+                setShowCorrectAnswer(true);  
                 setCorrectAnswer(messageData["correct_answer"]);
                 if (messageData["question_type"] === "freeText" && messageData["all_user_answers"]) {
                     setAllUserAnswers(messageData["all_user_answers"]);
                 }
                 if (messageData["question_type"] === "userChoice" && messageData["vote_results"]) {
                     setVoteResults(messageData["vote_results"]);
+                }
+                if (messageData["question_type"] === "userChoice" && messageData["detailed_vote_results"]) {
+                    setDetailedVoteResults(messageData["detailed_vote_results"]);
+                }
+                if (messageData["question_type"] === "multipleChoice" && messageData["multiple_choice_results"]) {
+                    setMultipleChoiceResults(messageData["multiple_choice_results"]);
                 }
             }
 
@@ -285,6 +295,7 @@ function Home({isAdmin}: Props) {
                     sendMessage={sendMessage}
                     showCorrectAnswer={showCorrectAnswer}
                     correctAnswer={correctAnswer}
+                    multipleChoiceResults={multipleChoiceResults}
                 />
 
             case "freeText":
@@ -307,6 +318,7 @@ function Home({isAdmin}: Props) {
                     showCorrectAnswer={showCorrectAnswer}
                     correctAnswer={correctAnswer}
                     voteResults={voteResults}
+                    detailedVoteResults={detailedVoteResults}
                 />
 
         }

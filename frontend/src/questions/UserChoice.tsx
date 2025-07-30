@@ -7,10 +7,11 @@ interface props {
     sendMessage: any,
     showCorrectAnswer: boolean,
     correctAnswer: string | null,
-    voteResults?: any
+    voteResults?: any,
+    detailedVoteResults?: {[key: string]: string[]} | null
 }
 
-function UserChoice({data, timer, sendMessage, showCorrectAnswer, correctAnswer, voteResults}: props) {
+function UserChoice({data, timer, sendMessage, showCorrectAnswer, correctAnswer, voteResults, detailedVoteResults}: props) {
 
     const [selectedUser, setSelectedUser] = useState<string | null>(null);
     const [availableUsers, setAvailableUsers] = useState<any[]>([]);
@@ -63,47 +64,78 @@ function UserChoice({data, timer, sendMessage, showCorrectAnswer, correctAnswer,
                 </h2>
                 <div style={{
                     display: "grid",
-                    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+                    gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
                     gap: "1rem",
-                    maxWidth: "800px",
+                    maxWidth: "1000px",
                     margin: "0 auto"
                 }}>
                     {Object.entries(voteResults)
                         .sort(([,a], [,b]) => (b as number) - (a as number))
-                        .map(([username, votes]) => (
-                        <div key={username} style={{
-                            display: "flex",
-                            flexDirection: "column",
-                            alignItems: "center",
-                            padding: "1rem",
-                            background: "rgba(255, 255, 255, 0.1)",
-                            borderRadius: "12px",
-                            border: "1px solid rgba(255, 255, 255, 0.2)",
-                            textAlign: "center",
-                            minHeight: "80px",
-                            justifyContent: "center"
-                        }}>
-                            <span style={{
-                                color: "white",
-                                fontSize: "1.1rem",
-                                fontWeight: "600",
-                                marginBottom: "0.5rem"
-                            }}>
-                                {username}
-                            </span>
-                            <span style={{
-                                color: "#00FFAA",
-                                fontSize: "1.4rem",
-                                fontWeight: "700"
-                            }}>
-                                {votes} vote{(votes as number) !== 1 ? 's' : ''}
-                            </span>
-                        </div>
-                    ))}
+                        .map(([username, votes]) => {
+                            const voters = detailedVoteResults?.[username] || [];
+                            
+                            return (
+                                <div key={username} style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    padding: "1.5rem",
+                                    background: "rgba(255, 255, 255, 0.1)",
+                                    borderRadius: "12px",
+                                    border: "1px solid rgba(255, 255, 255, 0.2)",
+                                    textAlign: "center",
+                                    minHeight: "120px"
+                                }}>
+                                    <span style={{
+                                        color: "#00FFAA",
+                                        fontSize: "1.2rem",
+                                        fontWeight: "700",
+                                        marginBottom: "0.5rem"
+                                    }}>
+                                        {username}
+                                    </span>
+                                    <span style={{
+                                        color: "white",
+                                        fontSize: "1.4rem",
+                                        fontWeight: "700",
+                                        marginBottom: "1rem"
+                                    }}>
+                                        {votes} vote{(votes as number) !== 1 ? 's' : ''}
+                                    </span>
+                                    
+                                    {voters.length > 0 && (
+                                        <div style={{
+                                            display: "flex",
+                                            flexWrap: "wrap",
+                                            gap: "0.3rem",
+                                            justifyContent: "center",
+                                            marginTop: "auto"
+                                        }}>
+                                            {voters.map((voter, voterIdx) => (
+                                                <span
+                                                    key={voterIdx}
+                                                    style={{
+                                                        background: "rgba(0, 255, 170, 0.2)",
+                                                        color: "rgba(0, 255, 170, 0.9)",
+                                                        padding: "0.2rem 0.5rem",
+                                                        borderRadius: "4px",
+                                                        fontSize: "0.8rem",
+                                                        border: "1px solid rgba(0, 255, 170, 0.3)"
+                                                    }}
+                                                >
+                                                    {voter}
+                                                </span>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                 </div>
             </div>
         );
     };
+
 
     return (
         <div style={{padding: "2rem"}}>

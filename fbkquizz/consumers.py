@@ -114,6 +114,8 @@ class QuizzConsumer(AsyncWebsocketConsumer):
         user_points = event["user_points"]
         all_user_answers = event.get("all_user_answers")
         vote_results = event.get("vote_results")
+        detailed_vote_results = event.get("detailed_vote_results")
+        multiple_choice_results = event.get("multiple_choice_results")
         question_type = event.get("question_type")
         await self.send(text_data=json.dumps({
             "status": status,
@@ -122,6 +124,8 @@ class QuizzConsumer(AsyncWebsocketConsumer):
             "user_points": user_points,
             "all_user_answers": all_user_answers,
             "vote_results": vote_results,
+            "detailed_vote_results": detailed_vote_results,
+            "multiple_choice_results": multiple_choice_results,
             "question_type": question_type
         }))
 
@@ -164,6 +168,8 @@ class QuizzConsumer(AsyncWebsocketConsumer):
             current_question_type = await self.get_current_question_type()
             all_user_answers = await self.get_all_user_answers() if current_question_type == "freeText" else None
             vote_results = await self.get_vote_results() if current_question_type == "userChoice" else None
+            detailed_vote_results = await self.get_detailed_vote_results() if current_question_type == "userChoice" else None
+            multiple_choice_results = await self.get_multiple_choice_results() if current_question_type == "multipleChoice" else None
             
             await self.channel_layer.group_send(
                 self.room_group_name, {
@@ -172,6 +178,8 @@ class QuizzConsumer(AsyncWebsocketConsumer):
                     "user_points": all_user_points,
                     "all_user_answers": all_user_answers,
                     "vote_results": vote_results,
+                    "detailed_vote_results": detailed_vote_results,
+                    "multiple_choice_results": multiple_choice_results,
                     "question_type": current_question_type,
                     "status": "success"
                 }
@@ -412,3 +420,52 @@ class QuizzConsumer(AsyncWebsocketConsumer):
                 vote_counts[voted_for] = vote_counts.get(voted_for, 0) + 1
         
         return vote_counts
+
+    @database_sync_to_async
+    def get_detailed_vote_results(self):
+        """Get detailed vote results showing who voted for whom for userChoice questions"""
+        current_question_id = GlobalSettings.objects.get(id=1).currentQuestion.id
+        detailed_votes = {}
+        
+        # Get all user answers for the current question
+        users_with_answers = UserSettings.objects.filter(
+            answers__has_key=str(current_question_id)
+        ).select_related('user')
+        
+        for user_setting in users_with_answers:
+            # Skip admin user
+            if user_setting.user.username == "markuss":
+                continue
+                
+            voted_for = user_setting.answers.get(str(current_question_id))
+            if voted_for and str(voted_for).strip():
+                if voted_for not in detailed_votes:
+                    detailed_votes[voted_for] = []
+                detailed_votes[voted_for].append(user_setting.user.username)
+        
+        return detailed_votes
+
+    @database_sync_to_async  
+    def get_multiple_choice_results(self):
+        """Get multiple choice answer distribution with usernames for each choice"""
+        current_question_id = GlobalSettings.objects.get(id=1).currentQuestion.id
+        choice_results = {}
+        
+        # Get all user answers for the current question
+        users_with_answers = UserSettings.objects.filter(
+            answers__has_key=str(current_question_id)
+        ).select_related('user')
+        
+        for user_setting in users_with_answers:
+            # Skip admin user
+            if user_setting.user.username == "markuss":
+                continue
+                
+            selected_choice = user_setting.answers.get(str(current_question_id))
+            if selected_choice is not None:  # Handle case where choice is 0
+                choice_key = str(selected_choice)
+                if choice_key not in choice_results:
+                    choice_results[choice_key] = []
+                choice_results[choice_key].append(user_setting.user.username)
+        
+        return choice_results

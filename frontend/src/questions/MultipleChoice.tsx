@@ -5,10 +5,11 @@ interface props {
     timer: any,
     sendMessage: any,
     showCorrectAnswer: boolean,
-    correctAnswer: string | null
+    correctAnswer: string | null,
+    multipleChoiceResults?: {[key: string]: string[]} | null
 }
 
-function MultipleChoice({data, timer, sendMessage, showCorrectAnswer, correctAnswer}: props) {
+function MultipleChoice({data, timer, sendMessage, showCorrectAnswer, correctAnswer, multipleChoiceResults}: props) {
 
     const [selectedAnswer, setSelectedAnswer] = useState(null);
 
@@ -85,12 +86,14 @@ function MultipleChoice({data, timer, sendMessage, showCorrectAnswer, correctAns
                 {
                     Object.entries(answers).map((answer, idx) => {
                         let buttonClass = `answer-button`;
+                        const playersForThisChoice = multipleChoiceResults?.[idx.toString()] || [];
+                        const isCorrectAnswer = correctAnswer === idx.toString();
                         
                         if (selectedAnswer === idx) {
                             buttonClass += ' selected';
                         }
                         
-                        if (showCorrectAnswer && correctAnswer === idx.toString()) {
+                        if (showCorrectAnswer && isCorrectAnswer) {
                             buttonClass += ' correct-answer';
                         }
                         
@@ -99,16 +102,63 @@ function MultipleChoice({data, timer, sendMessage, showCorrectAnswer, correctAns
                                 key={idx}
                                 className={buttonClass}
                                 disabled={timer === 0 || timer === 30 || showCorrectAnswer}
-                                onClick={event => {choseAnswer(event, idx)}}>
-                                {answer[1]}
-                                {showCorrectAnswer && correctAnswer === idx.toString() && 
-                                    <span style={{marginLeft: "10px", color: "#00ff00"}}>✓</span>
-                                }
+                                onClick={event => {choseAnswer(event, idx)}}
+                                style={{
+                                    display: "flex",
+                                    flexDirection: "column",
+                                    alignItems: "center",
+                                    gap: showCorrectAnswer && playersForThisChoice.length > 0 ? "0.8rem" : "0"
+                                }}>
+                                <div style={{
+                                    display: "flex",
+                                    alignItems: "center",
+                                    gap: "0.5rem"
+                                }}>
+                                    {answer[1]}
+                                    {showCorrectAnswer && isCorrectAnswer && 
+                                        <span style={{color: "#00ff00"}}>✓</span>
+                                    }
+                                    {showCorrectAnswer && playersForThisChoice.length > 0 && (
+                                        <span style={{
+                                            color: "rgba(255, 255, 255, 0.7)",
+                                            fontSize: "0.9rem"
+                                        }}>
+                                            ({playersForThisChoice.length})
+                                        </span>
+                                    )}
+                                </div>
+                                
+                                {showCorrectAnswer && playersForThisChoice.length > 0 && (
+                                    <div style={{
+                                        display: "flex",
+                                        flexWrap: "wrap",
+                                        gap: "0.3rem",
+                                        justifyContent: "center",
+                                        marginTop: "auto"
+                                    }}>
+                                        {playersForThisChoice.map((username, playerIdx) => (
+                                            <span
+                                                key={playerIdx}
+                                                style={{
+                                                    background: "rgba(0, 255, 170, 0.2)",
+                                                    color: "rgba(0, 255, 170, 0.9)",
+                                                    padding: "0.2rem 0.4rem",
+                                                    borderRadius: "3px",
+                                                    fontSize: "0.75rem",
+                                                    border: "1px solid rgba(0, 255, 170, 0.3)"
+                                                }}
+                                            >
+                                                {username}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
                             </button>
                         )
                     })
                 }
             </div>
+
         </div>
     )
 
