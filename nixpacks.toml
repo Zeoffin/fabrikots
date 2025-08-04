@@ -1,0 +1,9 @@
+[phases.build]
+cmds = [
+  "cd frontend && npm install && npm run build",
+  "mkdir -p static/frontend",
+  "cp -r frontend/dist/* static/frontend/"
+]
+
+[phases.setup]
+nixPkgs = ["nodejs_18", "python311", "redis"]

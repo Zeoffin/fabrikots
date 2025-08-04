@@ -190,4 +190,4 @@ class DeleteAnswersByQuestionId(APIView):
 
 
 def landing_page(request):
-    return render(request, "fabrikots/index.html")
+    return render(request, "index.html")

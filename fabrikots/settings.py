@@ -26,7 +26,7 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('SRC_ENV', default='PRODUCTION') == 'LOCAL'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['fabrikots-production.up.railway.app'] if not DEBUG else []
 
 # Application definition
 
@@ -62,7 +62,7 @@ ROOT_URLCONF = 'fabrikots.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -131,7 +131,12 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+STATICFILES_DIRS = [
+    BASE_DIR / 'static',
+]
 
 # Media files (uploaded files)
 MEDIA_URL = '/media/'
@@ -146,6 +151,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 ALLOWED_ORIGINS = [
     'http://localhost:5173',
     'http://127.0.0.1:5173',
+    'https://fabrikots-production.up.railway.app',
 ]
 CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS
 CORS_ALLOW_CREDENTIALS = True
