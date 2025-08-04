@@ -18,7 +18,7 @@ class Question(models.Model):
     )
 
     title = models.CharField(max_length=60, blank=True)
-    text = models.CharField(max_length=200, blank=True)
+    text = models.CharField(max_length=400, blank=True)
     # active = models.BooleanField(default=False)
     type = models.CharField(max_length=256, choices=TYPES)
     answers = models.JSONField(default=dict, blank=True)
