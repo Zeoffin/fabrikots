@@ -18,10 +18,12 @@ hyperlink==21.0.0
 idna==3.7
 incremental==22.10.0
 msgpack==1.0.8
+pillow==11.3.0
 pyasn1==0.6.0
 pyasn1_modules==0.4.0
 pycparser==2.22
 pyOpenSSL==24.1.0
+python-decouple==3.8
 redis==5.0.4
 service-identity==24.1.0
 six==1.16.0
