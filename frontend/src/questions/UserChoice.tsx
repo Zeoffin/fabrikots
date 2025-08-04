@@ -162,8 +162,7 @@ function UserChoice({data, timer, sendMessage, showCorrectAnswer, voteResults, d
                 backdropFilter: "blur(10px)",
                 marginBottom: "3rem"
             }}
-                 dangerouslySetInnerHTML={{__html: (data as any)["text"]}}>}
-            </div>
+                 dangerouslySetInnerHTML={{__html: (data as any)["text"]}} />
 
             {(data as any)["image"] && (
                 <div style={{ 
