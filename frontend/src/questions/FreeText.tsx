@@ -1,7 +1,7 @@
 import {useState, useEffect} from "react";
 
 interface props {
-    data: Object,
+    data: any,
     timer: any,
     sendMessage: any,
     showCorrectAnswer: boolean,
@@ -27,7 +27,7 @@ function FreeText({data, timer, sendMessage, showCorrectAnswer, correctAnswer, a
         }
     }, [timer, userAnswer, sendMessage]);
 
-    const handleInputChange = (e) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         const answer = e.target.value;
         setUserAnswer(answer);
         // Removed real-time answer sending - only submit when timer reaches 0
@@ -43,7 +43,7 @@ function FreeText({data, timer, sendMessage, showCorrectAnswer, correctAnswer, a
                 textAlign: "center",
                 textShadow: "0 0 20px rgba(0, 255, 170, 0.5)"
             }}>
-                {data["title"]}
+                {(data as any)["title"]}
             </h1>
             
             <div style={{
@@ -58,16 +58,16 @@ function FreeText({data, timer, sendMessage, showCorrectAnswer, correctAnswer, a
                 backdropFilter: "blur(10px)",
                 marginBottom: "3rem"
             }}
-                 dangerouslySetInnerHTML={{__html: data["text"]}}>
+                 dangerouslySetInnerHTML={{__html: (data as any)["text"]}}>}
             </div>
 
-            {data["image"] && (
+            {(data as any)["image"] && (
                 <div style={{ 
                     textAlign: "center",
                     marginBottom: "2rem"
                 }}>
                     <img 
-                        src={`http://127.0.0.1:8000${data["image"]}`}
+                        src={`http://127.0.0.1:8000${(data as any)["image"]}`}
                         alt="Question image"
                         style={{
                             maxWidth: "100%",

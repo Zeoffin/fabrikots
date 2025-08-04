@@ -77,7 +77,7 @@ function Join({handleState}: Props) {
         ).then(function (res) {
             axiosInstance.defaults.headers['X-Csrftoken'] = Cookies.get('csrftoken');
             handleState(true);
-        }).catch((e) => {
+        }).catch(() => {
            setStatus(false);
            setPassword('');
         });

@@ -1,7 +1,7 @@
 import {useState} from "react";
 
 interface props {
-    data: Object,
+    data: any,
     timer: any,
     sendMessage: any,
     showCorrectAnswer: boolean,
@@ -13,10 +13,10 @@ function MultipleChoice({data, timer, sendMessage, showCorrectAnswer, correctAns
 
     const [selectedAnswer, setSelectedAnswer] = useState(null);
 
-    const answers = data["answers"]["answers"];
+    const answers = (data as any)["answers"]["answers"];
     // console.log(data);
 
-    const choseAnswer = (e, answerIdx) => {
+    const choseAnswer = (_e: React.MouseEvent, answerIdx: number) => {
         setSelectedAnswer(answerIdx);
         sendMessage(JSON.stringify({
             "answer": {
@@ -39,7 +39,7 @@ function MultipleChoice({data, timer, sendMessage, showCorrectAnswer, correctAns
                 textAlign: "center",
                 textShadow: "0 0 20px rgba(0, 255, 170, 0.5)"
             }}>
-                {data["title"]}
+                {(data as any)["title"]}
             </h1>
             
             <div style={{
@@ -54,16 +54,16 @@ function MultipleChoice({data, timer, sendMessage, showCorrectAnswer, correctAns
                 backdropFilter: "blur(10px)",
                 marginBottom: "3rem"
             }}
-                 dangerouslySetInnerHTML={{__html: data["text"]}}>
+                 dangerouslySetInnerHTML={{__html: (data as any)["text"]}}>}
             </div>
 
-            {data["image"] && (
+            {(data as any)["image"] && (
                 <div style={{ 
                     textAlign: "center",
                     marginBottom: "2rem"
                 }}>
                     <img 
-                        src={`http://127.0.0.1:8000${data["image"]}`}
+                        src={`http://127.0.0.1:8000${(data as any)["image"]}`}
                         alt="Question image"
                         style={{
                             maxWidth: "100%",
@@ -114,7 +114,7 @@ function MultipleChoice({data, timer, sendMessage, showCorrectAnswer, correctAns
                                     alignItems: "center",
                                     gap: "0.5rem"
                                 }}>
-                                    {answer[1]}
+                                    {(answer as any)[1]}
                                     {showCorrectAnswer && isCorrectAnswer && 
                                         <span style={{color: "#00ff00"}}>✓</span>
                                     }

@@ -1,9 +1,9 @@
 interface props {
-    data: Object
+    data: any
 }
 
 function Info({data}: props) {
-    const hasText = data["text"] && data["text"].trim() !== "";
+    const hasText = (data as any)["text"] && (data as any)["text"].trim() !== "";
     
     if (!hasText) {
         return (
@@ -21,7 +21,7 @@ function Info({data}: props) {
                     textAlign: "center",
                     textShadow: "0 0 20px rgba(0, 255, 170, 0.5)"
                 }}>
-                    {data["title"]}
+                    {(data as any)["title"]}
                 </h1>
             </div>
         );
@@ -37,7 +37,7 @@ function Info({data}: props) {
                 textAlign: "center",
                 textShadow: "0 0 20px rgba(0, 255, 170, 0.5)"
             }}>
-                {data["title"]}
+                {(data as any)["title"]}
             </h1>
             <div style={{
                 textAlign: "left",
@@ -50,7 +50,7 @@ function Info({data}: props) {
                 border: "1px solid rgba(255, 255, 255, 0.1)",
                 backdropFilter: "blur(10px)"
             }}
-                 dangerouslySetInnerHTML={{__html: data["text"]}}>
+                 dangerouslySetInnerHTML={{__html: (data as any)["text"]}}>
             </div>
         </div>
     )

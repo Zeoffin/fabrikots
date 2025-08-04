@@ -2,7 +2,7 @@ import {useState, useEffect} from "react";
 import axiosInstance from "../AxiosInstance.tsx";
 
 interface props {
-    data: Object,
+    data: any,
     timer: any,
     sendMessage: any,
     showCorrectAnswer: boolean,
@@ -11,7 +11,7 @@ interface props {
     detailedVoteResults?: {[key: string]: string[]} | null
 }
 
-function UserChoice({data, timer, sendMessage, showCorrectAnswer, correctAnswer, voteResults, detailedVoteResults}: props) {
+function UserChoice({data, timer, sendMessage, showCorrectAnswer, voteResults, detailedVoteResults}: props) {
 
     const [selectedUser, setSelectedUser] = useState<string | null>(null);
     const [availableUsers, setAvailableUsers] = useState<any[]>([]);
@@ -100,7 +100,7 @@ function UserChoice({data, timer, sendMessage, showCorrectAnswer, correctAnswer,
                                         fontWeight: "700",
                                         marginBottom: "1rem"
                                     }}>
-                                        {votes} vote{(votes as number) !== 1 ? 's' : ''}
+                                        {votes as React.ReactNode} vote{(votes as number) !== 1 ? 's' : ''}
                                     </span>
                                     
                                     {voters.length > 0 && (
@@ -147,7 +147,7 @@ function UserChoice({data, timer, sendMessage, showCorrectAnswer, correctAnswer,
                 textAlign: "center",
                 textShadow: "0 0 20px rgba(0, 255, 170, 0.5)"
             }}>
-                {data["title"]}
+                {(data as any)["title"]}
             </h1>
             
             <div style={{
@@ -162,16 +162,16 @@ function UserChoice({data, timer, sendMessage, showCorrectAnswer, correctAnswer,
                 backdropFilter: "blur(10px)",
                 marginBottom: "3rem"
             }}
-                 dangerouslySetInnerHTML={{__html: data["text"]}}>
+                 dangerouslySetInnerHTML={{__html: (data as any)["text"]}}>}
             </div>
 
-            {data["image"] && (
+            {(data as any)["image"] && (
                 <div style={{ 
                     textAlign: "center",
                     marginBottom: "2rem"
                 }}>
                     <img 
-                        src={`http://127.0.0.1:8000${data["image"]}`}
+                        src={`http://127.0.0.1:8000${(data as any)["image"]}`}
                         alt="Question image"
                         style={{
                             maxWidth: "100%",
