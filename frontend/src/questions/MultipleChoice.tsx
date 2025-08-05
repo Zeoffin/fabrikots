@@ -11,7 +11,7 @@ interface props {
 
 function MultipleChoice({data, timer, sendMessage, showCorrectAnswer, correctAnswer, multipleChoiceResults}: props) {
 
-    const [selectedAnswer, setSelectedAnswer] = useState(null);
+    const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
 
     const answers = (data as any)["answers"]["answers"];
     // console.log(data);

@@ -33,7 +33,7 @@ function Home({isAdmin}: Props) {
 
     const [question, setQuestion] = useState(null);
     const [timer, setTimer] = useState(30);
-    const [active, setActive] = useState(false);
+    const [active] = useState(false);
     const [data, setData] = useState(null);
     const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
     const [correctAnswer, setCorrectAnswer] = useState(null);
@@ -47,13 +47,6 @@ function Home({isAdmin}: Props) {
 
 
     // TODO: Websockets - https://www.npmjs.com/package/react-use-websocket
-    const connectionStatus = {
-        [ReadyState.CONNECTING]: 'Connecting',
-        [ReadyState.OPEN]: 'Open',
-        [ReadyState.CLOSING]: 'Closing',
-        [ReadyState.CLOSED]: 'Closed',
-        [ReadyState.UNINSTANTIATED]: 'Uninstantiated',
-    }[readyState];
 
     useEffect(() => {
         if (lastMessage) {
@@ -98,7 +91,7 @@ function Home({isAdmin}: Props) {
             if (messageData["type"] === "answer_accepted") {
                 // Update the accepted status in allUserAnswers
                 if (allUserAnswers) {
-                    const updatedAnswers = allUserAnswers.map(userAnswer => {
+                    const updatedAnswers = allUserAnswers.map((userAnswer: any) => {
                         if (userAnswer.username === messageData["accepted_username"]) {
                             return { ...userAnswer, accepted: true };
                         }
@@ -111,13 +104,13 @@ function Home({isAdmin}: Props) {
             if (messageData["type"] === "wheelspin_result") {
                 // Update user points after wheelspin action
                 if (messageData["user_points"]) {
-                    setUserPoints({ response: messageData["user_points"] });
+                    setUserPoints(messageData["user_points"]);
                 }
             }
 
             // Update userPoints from various message types
             if (messageData["user_points"]) {
-                setUserPoints({ response: messageData["user_points"] });
+                setUserPoints(messageData["user_points"]);
             }
 
         }
@@ -145,8 +138,8 @@ function Home({isAdmin}: Props) {
 
     // ===================================================================================          Timer
 
-    const startTimer = (e) => {
-        sendMessage(JSON.stringify({"start_timer": data["time"]}));
+    const startTimer = (_e: React.MouseEvent) => {
+        sendMessage(JSON.stringify({"start_timer": data?.["time"]}));
     }
 
     // ===================================================================================      BACKEND REQUESTS
@@ -168,7 +161,7 @@ function Home({isAdmin}: Props) {
         });
     }
 
-    const chooseQuestion = (e, direction) => {
+    const chooseQuestion = (_e: React.MouseEvent, direction: string) => {
         sendMessage(JSON.stringify({"direction": direction}));
     }
 
@@ -201,7 +194,7 @@ function Home({isAdmin}: Props) {
 
     const renderTimer = () => {
         // Don't show timer for info questions with time = -1
-        if (data["type"] === "info" && data["time"] === -1) {
+        if (data?.["type"] === "info" && data?.["time"] === -1) {
             return null;
         }
 
@@ -228,7 +221,7 @@ function Home({isAdmin}: Props) {
             )
         }
 
-        if ("time" in data && parseInt(data["time"]) > -1) {
+        if (data && "time" in data && parseInt(data["time"]) > -1) {
             return (
                 <div className="timer-display timer-normal" style={{
                     position: "absolute",
@@ -295,7 +288,7 @@ function Home({isAdmin}: Props) {
 
     const renderQuestion = () => {
         // For info questions with time = -1, show the info immediately
-        if (data["type"] === "info" && data["time"] === -1) {
+        if (data?.["type"] === "info" && data?.["time"] === -1) {
             return <Info data={data}/>
         }
 
@@ -315,13 +308,13 @@ function Home({isAdmin}: Props) {
                         textAlign: "center",
                         textShadow: "0 0 20px rgba(0, 255, 170, 0.5)"
                     }}>
-                        {data["title"]}
+                        {data?.["title"]}
                     </h1>
                 </div>
             );
         }
 
-        switch (data["type"]) {
+        switch (data?.["type"]) {
 
             case 'info':
                 return <Info data={data}/>

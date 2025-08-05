@@ -1,7 +1,4 @@
-import {ToastContainer, toast} from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 import Form from "react-bootstrap/Form";
-import Button from "react-bootstrap/Button";
 import {useState} from "react";
 import Terms from "./Terms.tsx";
 import {BrowserRouter, Link, Route, Routes} from "react-router-dom";
@@ -65,7 +62,7 @@ function Join({handleState}: Props) {
         )
     }
 
-    function submitLogin(e) {
+    function submitLogin(e: React.FormEvent) {
 
         e.preventDefault();
         axiosInstance.post(
@@ -74,7 +71,7 @@ function Join({handleState}: Props) {
                 username: username,
                 password: password
             }
-        ).then(function (res) {
+        ).then(function (_res) {
             axiosInstance.defaults.headers['X-Csrftoken'] = Cookies.get('csrftoken');
             handleState(true);
         }).catch(() => {
