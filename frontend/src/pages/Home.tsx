@@ -1,7 +1,7 @@
 import '../App.css'
 import UserPoints from "../components/UserPoints.tsx";
 import axiosInstance from "../AxiosInstance.tsx";
-import useWebSocket, {ReadyState} from "react-use-websocket";
+import useWebSocket from "react-use-websocket";
 import {Grid} from "@mui/material";
 import Logout from "../components/Logout.tsx";
 import {useEffect, useState} from "react";
@@ -33,7 +33,6 @@ function Home({isAdmin}: Props) {
 
     const [question, setQuestion] = useState(null);
     const [timer, setTimer] = useState(30);
-    const [active] = useState(false);
     const [data, setData] = useState(null);
     const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
     const [correctAnswer, setCorrectAnswer] = useState(null);
@@ -91,7 +90,7 @@ function Home({isAdmin}: Props) {
             if (messageData["type"] === "answer_accepted") {
                 // Update the accepted status in allUserAnswers
                 if (allUserAnswers) {
-                    const updatedAnswers = allUserAnswers.map((userAnswer: any) => {
+                    const updatedAnswers = (allUserAnswers as any[]).map((userAnswer: any) => {
                         if (userAnswer.username === messageData["accepted_username"]) {
                             return { ...userAnswer, accepted: true };
                         }
@@ -316,10 +315,10 @@ function Home({isAdmin}: Props) {
 
         switch (data?.["type"]) {
 
-            case 'info':
+            case 'info' as const:
                 return <Info data={data}/>
 
-            case "multipleChoice":
+            case "multipleChoice" as const:
                 return <MultipleChoice 
                     data={data} 
                     timer={timer} 
@@ -329,7 +328,7 @@ function Home({isAdmin}: Props) {
                     multipleChoiceResults={multipleChoiceResults}
                 />
 
-            case "freeText":
+            case "freeText" as const:
                 return <FreeText 
                     data={data} 
                     timer={timer} 
@@ -341,7 +340,7 @@ function Home({isAdmin}: Props) {
                     onAcceptAnswer={acceptAnswer}
                 />
 
-            case "userChoice":
+            case "userChoice" as const:
                 return <UserChoice 
                     data={data} 
                     timer={timer} 

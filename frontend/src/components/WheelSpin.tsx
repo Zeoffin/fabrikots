@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Button, FormControl, InputLabel, MenuItem, Select, TextField } from '@mui/material';
+import { Button, FormControl, InputLabel, MenuItem, Select } from '@mui/material';
 
 interface Props {
     userPoints: any;
@@ -37,12 +37,11 @@ const WHEEL_ACTIONS: WheelAction[] = [
     { id: 'no_effect', label: 'Nu neko nedabūji', color: getRandomHSL() }
 ];
 
-const WheelSpin: React.FC<Props> = ({ userPoints, sendMessage, readyState, lastMessage }) => {
+const WheelSpin: React.FC<Props> = ({ userPoints, sendMessage, lastMessage }) => {
     const [selectedUser, setSelectedUser] = useState('');
     const [isSpinning, setIsSpinning] = useState(false);
     const [showWheel, setShowWheel] = useState(false);
     const [selectedAction, setSelectedAction] = useState<WheelAction | null>(null);
-    const [spinResult, setSpinResult] = useState<string | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     const users = userPoints?.response ? Object.keys(userPoints.response).filter(user => user !== 'markuss') : [];

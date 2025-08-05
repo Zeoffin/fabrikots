@@ -1,9 +1,8 @@
-import {Box, Button, Grid} from "@mui/material";
+import {Box, Grid} from "@mui/material";
 import {useEffect, useState, useCallback, useRef} from "react";
 import axiosInstance from "../AxiosInstance.tsx";
 import Form from "react-bootstrap/Form";
-import useWebSocket, {ReadyState} from "react-use-websocket";
-import {pointsSocket} from "../../WebSockets.tsx";
+import {ReadyState} from "react-use-websocket";
 
 const noUsers = {
     "response": {
@@ -15,9 +14,9 @@ const noUsers = {
 
 interface Props {
     isStaff: boolean,
-    sendMessage: any,
-    lastMessage: any,
-    readyState: any
+    sendMessage: (message: string) => void,
+    lastMessage: MessageEvent | null,
+    readyState: ReadyState
 }
 
 function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
@@ -102,7 +101,7 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
     //     console.log(lastMessage);
     // }, [lastMessage]);
 
-    const changePoint = useCallback((e, user, addPoint) => {
+    const changePoint = useCallback((e: React.FormEvent, user: string, addPoint: boolean) => {
         e.preventDefault();
         const point_change = {
             "user": user,
@@ -117,12 +116,12 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
 
         // Sort users by points in descending order
         const sortedUsers = Object.keys(userPoints.response)
-            .sort((a, b) => userPoints.response[b]['points'] - userPoints.response[a]['points']);
+            .sort((a, b) => (userPoints.response as any)[b]['points'] - (userPoints.response as any)[a]['points']);
 
         if (isStaff) {
 
             return (
-                sortedUsers.map((key, index) => (
+                sortedUsers.map((key) => (
                     <div key={key} className="admin-user-row" style={{
                         display: 'flex',
                         alignItems: 'center',
@@ -169,14 +168,16 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
                                     height: '18px'
                                 }}
                                 onMouseOver={(e) => {
-                                    if (!e.target.disabled) {
-                                        e.target.style.background = 'rgba(255, 75, 87, 1)';
-                                        e.target.style.transform = 'scale(1.05)';
+                                    const target = e.target as HTMLButtonElement;
+                                    if (!target.disabled) {
+                                        target.style.background = 'rgba(255, 75, 87, 1)';
+                                        target.style.transform = 'scale(1.05)';
                                     }
                                 }}
                                 onMouseOut={(e) => {
-                                    e.target.style.background = 'rgba(255, 75, 87, 0.8)';
-                                    e.target.style.transform = 'scale(1)';
+                                    const target = e.target as HTMLButtonElement;
+                                    target.style.background = 'rgba(255, 75, 87, 0.8)';
+                                    target.style.transform = 'scale(1)';
                                 }}>
                                 −
                             </button>
@@ -198,7 +199,7 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
                                     : 'none',
                                 transform: pointGlows[key] ? 'scale(1.1)' : 'scale(1)'
                             }}>
-                                {userPoints.response[key]['points']}
+                                {(userPoints.response as any)[key]['points']}
                             </div>
 
                             <Form onSubmit={e => changePoint(e, key, true)} style={{margin: 0}}>
@@ -219,14 +220,16 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
                                         height: '18px'
                                     }}
                                     onMouseOver={(e) => {
-                                        if (!e.target.disabled) {
-                                            e.target.style.background = 'rgba(0, 255, 170, 1)';
-                                            e.target.style.transform = 'scale(1.05)';
+                                        const target = e.target as HTMLButtonElement;
+                                        if (!target.disabled) {
+                                            target.style.background = 'rgba(0, 255, 170, 1)';
+                                            target.style.transform = 'scale(1.05)';
                                         }
                                     }}
                                     onMouseOut={(e) => {
-                                        e.target.style.background = 'rgba(0, 255, 170, 0.8)';
-                                        e.target.style.transform = 'scale(1)';
+                                        const target = e.target as HTMLButtonElement;
+                                        target.style.background = 'rgba(0, 255, 170, 0.8)';
+                                        target.style.transform = 'scale(1)';
                                     }}>
                                     +
                                 </button>
@@ -239,7 +242,7 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
         } else {
 
             return (
-                sortedUsers.map((key, index) => (
+                sortedUsers.map((key) => (
                     <>
                         <Grid container key={key} className={"user-row"}>
 
@@ -263,7 +266,7 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
                                         ? 'rgba(255, 75, 87, 1)' 
                                         : 'inherit'
                                 }}>
-                                    {userPoints.response[key]['points']}
+                                    {(userPoints.response as any)[key]['points']}
                                 </span>
                             </Grid>
 

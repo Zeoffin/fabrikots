@@ -1,9 +1,6 @@
 import UserPoints from "../components/UserPoints.tsx";
 import Logout from "../components/Logout.tsx";
-import {useState} from "react";
-import axiosInstance from "../AxiosInstance.tsx";
-import useWebSocket, {ReadyState} from 'react-use-websocket';
-import {pointsSocket} from "../../WebSockets.tsx";
+import {ReadyState} from 'react-use-websocket';
 import Grid from '@mui/material/Grid';
 
 function Admin() {
@@ -28,11 +25,7 @@ function Admin() {
      *          notes: only for admin eyes !
      *      }
      */
-    const [question, setQuestion] = useState();
 
-    function sleep(ms = 0) {
-        return new Promise(resolve => setTimeout(resolve, ms));
-    }
 
 
     return (
@@ -55,7 +48,7 @@ function Admin() {
                 </Grid>
 
                 <Grid item xs={1}>
-                    <UserPoints isStaff={true}/>
+                    <UserPoints isStaff={true} sendMessage={() => {}} lastMessage={null} readyState={ReadyState.CLOSED}/>
                 </Grid>
 
             </Grid>

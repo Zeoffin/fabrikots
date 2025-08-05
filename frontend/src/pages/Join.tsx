@@ -72,7 +72,10 @@ function Join({handleState}: Props) {
                 password: password
             }
         ).then(function (_res) {
-            axiosInstance.defaults.headers['X-Csrftoken'] = Cookies.get('csrftoken');
+            const csrfToken = Cookies.get('csrftoken');
+            if (csrfToken) {
+                axiosInstance.defaults.headers['X-Csrftoken'] = csrfToken;
+            }
             handleState(true);
         }).catch(() => {
            setStatus(false);

@@ -36,7 +36,6 @@ const WheelDisplay: React.FC<Props> = ({ lastMessage }) => {
     const [targetUser, setTargetUser] = useState('');
     const [isSpinning, setIsSpinning] = useState(false);
     const [selectedAction, setSelectedAction] = useState<WheelAction | null>(null);
-    const [spinResult, setSpinResult] = useState<string | null>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
