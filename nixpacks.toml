@@ -1,13 +1,14 @@
 [phases.setup]
-nixPkgs = ['nodejs']
+nixPkgs = ['...', 'nodejs']
 
 [phases.install]
-cmds = ['cd frontend && npm install']
+cmds = ['...', 'cd frontend && npm install']
 
 [phases.build]  
 cmds = [
+    '...',
     'cd frontend && npm run build',
-    'rm -rf static/frontend',
+    'rm -rf static/frontend',  
     'mkdir -p static/frontend',
     'cp -r frontend/dist/* static/frontend/'
 ]
