@@ -2,25 +2,10 @@
 NODE_VERSION = "18"
 NIXPACKS_PYTHON_VERSION = "3.11"
 
-[phases.setup]
-nixPkgs = [
-  "nodejs-18_x", 
-  "python311", 
-  "python311Packages.pip",
-  "python311Packages.setuptools",
-  "python311Packages.wheel"
-]
-
-[phases.install]
-cmds = [
-  # Install Python dependencies with --break-system-packages for nixpacks
-  "python -m pip install --break-system-packages -r requirements.txt",
-  # Install Node.js dependencies
-  "cd frontend && npm install"
-]
-
 [phases.build] 
 cmds = [
+  # Install Node.js dependencies for frontend
+  "cd frontend && npm install",
   # Build React frontend
   "cd frontend && NODE_ENV=production npm run build",
   # Create static directory structure for Django
