@@ -57,6 +57,11 @@ npm run lint
 npm run preview
 ```
 
+### Environment Variables
+- `VITE_SHOW_LOGIN_SCREEN`: Controls whether to show the login form or countdown timer
+  - `true`: Shows normal login screen
+  - `false`: Shows countdown timer until event starts (2025-08-08 20:00 UTC+3)
+
 ## Architecture Overview
 
 ### Backend Structure
