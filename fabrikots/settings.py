@@ -141,6 +141,10 @@ STATICFILES_DIRS = []
 if (BASE_DIR / 'static').exists():
     STATICFILES_DIRS.append(BASE_DIR / 'static')
 
+# WhiteNoise configuration
+WHITENOISE_USE_FINDERS = True
+WHITENOISE_AUTOREFRESH = True
+
 # Media files (uploaded files)
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
