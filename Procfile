@@ -1,1 +1,1 @@
-web: python manage.py migrate && python manage.py collectstatic --noinput --clear && gunicorn fabrikots.wsgi
+web: python manage.py migrate && python manage.py collectstatic --noinput --clear && python -m gunicorn fabrikots.asgi:application -k uvicorn.workers.UvicornWorker

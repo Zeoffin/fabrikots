@@ -1,4 +1,6 @@
 from django.contrib.auth import get_user_model, login, logout, get_user
+from django.middleware.csrf import get_token
+from django.http import JsonResponse
 from rest_framework.authentication import SessionAuthentication
 from rest_framework.views import APIView
 from rest_framework.response import Response
@@ -38,3 +40,10 @@ class UserView(APIView):
     def get(self, request):
         serializer = UserSerializer(request.user)
         return Response({'user': serializer.data}, status=status.HTTP_200_OK)
+
+
+def csrf_token_view(request):
+    """
+    Endpoint to get CSRF token for frontend
+    """
+    return JsonResponse({'csrfToken': get_token(request)})

@@ -15,7 +15,6 @@ class QuizzConsumer(AsyncWebsocketConsumer):
     """
 
     TIMER = 14
-    global_settings = GlobalSettings.objects.get(id=1)
 
     async def connect(self):
 
@@ -319,10 +318,12 @@ class QuizzConsumer(AsyncWebsocketConsumer):
     def change_question(self, direction):
 
         try:
+            global_settings = GlobalSettings.objects.get(id=1)
+            
             if direction == "next":
-                next_question = self.global_settings.currentQuestion.id + 1
+                next_question = global_settings.currentQuestion.id + 1
             else:
-                next_question = self.global_settings.currentQuestion.id - 1
+                next_question = global_settings.currentQuestion.id - 1
 
             question = Question.objects.get(id=next_question)
             
@@ -331,8 +332,8 @@ class QuizzConsumer(AsyncWebsocketConsumer):
             question.finished = False
             question.save()
             
-            self.global_settings.currentQuestion = question
-            self.global_settings.save()
+            global_settings.currentQuestion = question
+            global_settings.save()
 
         except Question.DoesNotExist:
             pass

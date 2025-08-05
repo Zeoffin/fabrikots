@@ -16,14 +16,23 @@ function App() {
     }
 
     useEffect(() => {
-        axiosInstance.get("/api/user")
-            .then(function (res) {
+        const checkAuthentication = async () => {
+            try {
+                // First, ensure we have a CSRF token in production
+                if (import.meta.env.PROD) {
+                    await axiosInstance.get('/api/csrf-token');
+                }
+                
+                // Then check user authentication
+                const res = await axiosInstance.get("/api/user");
                 setIsStaff(res.data['user']['is_staff']);
                 setCurrentUser(true);
-            })
-            .catch(function () {
+            } catch (error) {
                 setCurrentUser(false);
-            });
+            }
+        };
+        
+        checkAuthentication();
     }, []);
 
     if (currentUser == null) {

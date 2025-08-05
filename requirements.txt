@@ -32,6 +32,7 @@ Twisted==24.3.0
 txaio==23.1.1
 typing_extensions==4.10.0
 gunicorn==21.2.0
+uvicorn[standard]==0.30.6
 whitenoise==6.7.0
 zope.interface==6.3
 dj-database-url==2.1.0
