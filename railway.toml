@@ -7,4 +7,5 @@ startCommand = "python manage.py collectstatic --noinput && python manage.py mig
 [env]
 NODE_VERSION = "18"
 NIXPACKS_PYTHON_VERSION = "3.11"
+NODE_ENV = "production"
 SRC_ENV = "PRODUCTION"

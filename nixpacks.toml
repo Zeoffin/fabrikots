@@ -1,9 +1,11 @@
+[variables]
+NODE_VERSION = "18"
+NIXPACKS_PYTHON_VERSION = "3.11"
+
 [phases.build]
 cmds = [
-  "cd frontend && NODE_ENV=production npm install && NODE_ENV=production npm run build",
-  "mkdir -p static/frontend",
+  "cd frontend && npm install",
+  "cd frontend && npm run build",
+  "mkdir -p static/frontend", 
   "cp -r frontend/dist/* static/frontend/"
 ]
-
-[phases.setup]
-nixPkgs = ["nodejs_18", "python311", "redis"]
