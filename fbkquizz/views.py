@@ -197,8 +197,14 @@ def landing_page(request):
     if not settings.DEBUG:
         index_path = os.path.join(settings.STATIC_ROOT, 'frontend', 'index.html')
         if os.path.exists(index_path):
-            with open(index_path, 'r') as f:
+            with open(index_path, 'r', encoding='utf-8') as f:
                 return HttpResponse(f.read(), content_type='text/html')
+        else:
+            # Also try the static directory (before collectstatic)
+            static_index_path = os.path.join(settings.BASE_DIR, 'static', 'frontend', 'index.html')
+            if os.path.exists(static_index_path):
+                with open(static_index_path, 'r', encoding='utf-8') as f:
+                    return HttpResponse(f.read(), content_type='text/html')
     
     # Fallback to Django template for development
     return render(request, "index.html")
