@@ -46,7 +46,7 @@ const WheelDisplay: React.FC<Props> = ({ lastMessage }) => {
                 setTargetUser(messageData["target_user"]);
                 setShowWheel(true);
                 setIsSpinning(true);
-                setSpinResult(null);
+                // removed setSpinResult(null);
                 setSelectedAction(null);
                 
                 // Use server-provided spin parameters for synchronized animation
@@ -64,13 +64,13 @@ const WheelDisplay: React.FC<Props> = ({ lastMessage }) => {
                 const action = WHEEL_ACTIONS.find(a => a.id === messageData["action"]);
                 if (action) {
                     setSelectedAction(action);
-                    setSpinResult(`${action.label}`);
+                    // removed setSpinResult(`${action.label}`);
                     setIsSpinning(false);
                     
                     // Hide wheel after showing result
                     setTimeout(() => {
                         setShowWheel(false);
-                        setSpinResult(null);
+                        // removed setSpinResult(null);
                         setSelectedAction(null);
                         setTargetUser('');
                     }, 5000);
@@ -217,7 +217,7 @@ const WheelDisplay: React.FC<Props> = ({ lastMessage }) => {
                 
                 // Use the visual action that the pointer is actually pointing to
                 setSelectedAction(visualAction);
-                setSpinResult(visualAction.label);
+                // removed setSpinResult(visualAction.label);
                 setIsSpinning(false);
                 
                 // Debug log to check alignment
@@ -231,7 +231,7 @@ const WheelDisplay: React.FC<Props> = ({ lastMessage }) => {
                 // Auto-hide after showing result
                 setTimeout(() => {
                     setShowWheel(false);
-                    setSpinResult(null);
+                    // removed setSpinResult(null);
                     setSelectedAction(null);
                     setTargetUser('');
                 }, 4000);
@@ -243,7 +243,7 @@ const WheelDisplay: React.FC<Props> = ({ lastMessage }) => {
 
     const closeWheel = () => {
         setShowWheel(false);
-        setSpinResult(null);
+        // removed setSpinResult(null);
         setSelectedAction(null);
         setTargetUser('');
         setIsSpinning(false);

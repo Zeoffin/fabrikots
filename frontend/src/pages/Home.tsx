@@ -37,7 +37,7 @@ function Home({isAdmin}: Props) {
     const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
     const [correctAnswer, setCorrectAnswer] = useState(null);
     const [timerStarted, setTimerStarted] = useState(false);
-    const [allUserAnswers, setAllUserAnswers] = useState(null);
+    const [allUserAnswers, setAllUserAnswers] = useState<any[] | null>(null);
     const [voteResults, setVoteResults] = useState(null);
     const [detailedVoteResults, setDetailedVoteResults] = useState(null);
     const [multipleChoiceResults, setMultipleChoiceResults] = useState(null);
@@ -313,12 +313,16 @@ function Home({isAdmin}: Props) {
             );
         }
 
-        switch (data?.["type"]) {
+        if (!data?.["type"]) {
+            return null;
+        }
 
-            case 'info' as const:
+        switch (data["type"]) {
+
+            case 'info':
                 return <Info data={data}/>
 
-            case "multipleChoice" as const:
+            case "multipleChoice":
                 return <MultipleChoice 
                     data={data} 
                     timer={timer} 
@@ -328,7 +332,7 @@ function Home({isAdmin}: Props) {
                     multipleChoiceResults={multipleChoiceResults}
                 />
 
-            case "freeText" as const:
+            case "freeText":
                 return <FreeText 
                     data={data} 
                     timer={timer} 
@@ -340,7 +344,7 @@ function Home({isAdmin}: Props) {
                     onAcceptAnswer={acceptAnswer}
                 />
 
-            case "userChoice" as const:
+            case "userChoice":
                 return <UserChoice 
                     data={data} 
                     timer={timer} 

@@ -4,12 +4,12 @@ import Form from "react-bootstrap/Form";
 
 function Logout() {
 
-    function submitLogout(e) {
+    function submitLogout(e: React.FormEvent) {
         e.preventDefault();
         axiosInstance.post(
             "/api/logout",
             {withCredentials: true}
-        ).then(function (res) {
+        ).then(function () {
             localStorage.removeItem('sessionid');
             localStorage.removeItem('csrftoken');
 

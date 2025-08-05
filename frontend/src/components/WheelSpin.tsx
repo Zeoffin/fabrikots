@@ -162,7 +162,7 @@ const WheelSpin: React.FC<Props> = ({ userPoints, sendMessage, lastMessage }) =>
 
         setIsSpinning(true);
         setShowWheel(true);
-        setSpinResult(null);
+        // removed setSpinResult(null);
     };
 
     const spinWheelWithParams = (finalRotation: number, spinDuration: number, serverSelectedAction: any) => {
@@ -206,11 +206,11 @@ const WheelSpin: React.FC<Props> = ({ userPoints, sendMessage, lastMessage }) =>
 
         sendMessage(JSON.stringify({ wheelspin: wheelspinData }));
         
-        setSpinResult(action.label);
+        // removed setSpinResult(action.label);
         
         setTimeout(() => {
             setShowWheel(false);
-            setSpinResult(null);
+            // removed setSpinResult(null);
             setSelectedAction(null);
             setSelectedUser('');
         }, 3000);
@@ -218,7 +218,7 @@ const WheelSpin: React.FC<Props> = ({ userPoints, sendMessage, lastMessage }) =>
 
     const closeWheel = () => {
         setShowWheel(false);
-        setSpinResult(null);
+        // removed setSpinResult(null);
         setSelectedAction(null);
         setSelectedUser('');
         setIsSpinning(false);

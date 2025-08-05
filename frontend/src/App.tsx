@@ -1,7 +1,6 @@
 import './App.css';
 import Join from "./pages/Join.tsx";
 import Home from "./pages/Home.tsx";
-import Admin from "./pages/Admin.tsx";
 import Loading from "./components/Loading.tsx";
 import axiosInstance from "./AxiosInstance.tsx";
 
@@ -9,7 +8,7 @@ import {useState, useEffect} from 'react';
 
 function App() {
 
-    const [currentUser, setCurrentUser] = useState<boolean>(null);
+    const [currentUser, setCurrentUser] = useState<boolean | null>(null);
     const [isStaff, setIsStaff] = useState<boolean>(false);
 
     function handleSetCurrentUser(authorized: boolean) {
@@ -22,7 +21,7 @@ function App() {
                 setIsStaff(res.data['user']['is_staff']);
                 setCurrentUser(true);
             })
-            .catch(function (error) {
+            .catch(function () {
                 setCurrentUser(false);
             });
     }, []);
