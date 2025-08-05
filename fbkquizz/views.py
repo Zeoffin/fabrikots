@@ -8,6 +8,9 @@ from user_api.serializers import UserSerializer
 from .models import UserSettings, GlobalSettings, Question
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
+from django.http import HttpResponse
+from django.conf import settings
+import os
 
 UserModel = get_user_model()
 
@@ -190,4 +193,12 @@ class DeleteAnswersByQuestionId(APIView):
 
 
 def landing_page(request):
+    # In production, serve the React build
+    if not settings.DEBUG:
+        index_path = os.path.join(settings.STATIC_ROOT, 'frontend', 'index.html')
+        if os.path.exists(index_path):
+            with open(index_path, 'r') as f:
+                return HttpResponse(f.read(), content_type='text/html')
+    
+    # Fallback to Django template for development
     return render(request, "index.html")
