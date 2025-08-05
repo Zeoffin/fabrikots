@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import os
 from pathlib import Path
 from decouple import config
 
@@ -26,7 +27,19 @@ SECRET_KEY = config('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = config('SRC_ENV', default='PRODUCTION') == 'LOCAL'
 
-ALLOWED_HOSTS = ['fabrikots-production.up.railway.app'] if not DEBUG else []
+# Allowed hosts configuration
+if DEBUG:
+    ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
+else:
+    # Production hosts
+    allowed_hosts = ['fabrikots-production.up.railway.app']
+    
+    # Add custom domain if provided
+    custom_domain = config('ALLOWED_HOST', default=None)
+    if custom_domain:
+        allowed_hosts.append(custom_domain)
+    
+    ALLOWED_HOSTS = allowed_hosts
 
 # Application definition
 
@@ -90,12 +103,20 @@ REST_FRAMEWORK = {
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'fabrikots.sqlite3',
+# Use PostgreSQL for production if DATABASE_URL is provided, otherwise SQLite
+database_url = config('DATABASE_URL', default=None)
+if database_url and not DEBUG:
+    import dj_database_url
+    DATABASES = {
+        'default': dj_database_url.parse(database_url)
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': BASE_DIR / 'fabrikots.sqlite3',
+        }
+    }
 
 
 # Password validation
@@ -135,11 +156,16 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
+# Static files directories
 STATICFILES_DIRS = []
 
-# Only add static directory if it exists (for production builds)
+# Add static directory if it exists (for production builds with React frontend)
 if (BASE_DIR / 'static').exists():
     STATICFILES_DIRS.append(BASE_DIR / 'static')
+
+# For production, also include the built frontend
+if not DEBUG and (BASE_DIR / 'static' / 'frontend').exists():
+    STATICFILES_DIRS.append(BASE_DIR / 'static' / 'frontend')
 
 # WhiteNoise configuration
 WHITENOISE_USE_FINDERS = True
@@ -155,22 +181,56 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # CORS Settings
-ALLOWED_ORIGINS = [
-    'http://localhost:5173',
-    'http://127.0.0.1:5173',
-    'https://fabrikots-production.up.railway.app',
-]
+if DEBUG:
+    # Development CORS settings
+    ALLOWED_ORIGINS = [
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+    ]
+else:
+    # Production CORS settings
+    allowed_origins = ['https://fabrikots-production.up.railway.app']
+    
+    # Add custom domain if provided
+    custom_domain = config('ALLOWED_HOST', default=None)
+    if custom_domain:
+        allowed_origins.append(f'https://{custom_domain}')
+    
+    ALLOWED_ORIGINS = allowed_origins
+
 CSRF_TRUSTED_ORIGINS = ALLOWED_ORIGINS
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = ALLOWED_ORIGINS
 
 # Channels
 
-CHANNEL_LAYERS = {
-    'default': {
-        'BACKEND': "channels_redis.core.RedisChannelLayer",
-        'CONFIG': {
-            'hosts': [('127.0.0.1', 6379)],  # Redis konfigjers
+# Redis configuration for channels
+if DEBUG:
+    # Local development
+    CHANNEL_LAYERS = {
+        'default': {
+            'BACKEND': "channels_redis.core.RedisChannelLayer",
+            'CONFIG': {
+                'hosts': [('127.0.0.1', 6379)],
+            },
         },
-    },
-}
+    }
+else:
+    # Production - use Railway's Redis URL if available, otherwise in-memory
+    redis_url = config('REDIS_URL', default=None)
+    if redis_url:
+        CHANNEL_LAYERS = {
+            'default': {
+                'BACKEND': "channels_redis.core.RedisChannelLayer",
+                'CONFIG': {
+                    'hosts': [redis_url],
+                },
+            },
+        }
+    else:
+        # Fallback to in-memory channel layer
+        CHANNEL_LAYERS = {
+            'default': {
+                'BACKEND': "channels.layers.InMemoryChannelLayer",
+            },
+        }

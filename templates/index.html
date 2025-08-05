@@ -4,10 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Fabrikots Quiz</title>
-    <script type="module" crossorigin src="{% load static %}{% static 'frontend/assets/index.js' %}"></script>
-    <link rel="stylesheet" href="{% load static %}{% static 'frontend/assets/index.css' %}">
+    <!-- Development fallback template -->
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+        }
+    </style>
 </head>
 <body>
-    <div id="root"></div>
+    <div id="root">
+        <h1>Fabrikots Quiz</h1>
+        <p>Loading...</p>
+        <p>If you see this message, the React build may not be properly configured for production.</p>
+    </div>
 </body>
 </html>
