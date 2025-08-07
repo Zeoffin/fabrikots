@@ -48,7 +48,7 @@ function Admin() {
                 </Grid>
 
                 <Grid item xs={1}>
-                    <UserPoints isStaff={true} sendMessage={() => {}} lastMessage={null} readyState={ReadyState.CLOSED}/>
+                    <UserPoints isStaff={true} sendMessage={() => {}} lastMessage={null} readyState={ReadyState.CLOSED} currentQuestionId={null}/>
                 </Grid>
 
             </Grid>

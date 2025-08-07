@@ -16,14 +16,20 @@ interface Props {
     isStaff: boolean,
     sendMessage: (message: string) => void,
     lastMessage: MessageEvent | null,
-    readyState: ReadyState
+    readyState: ReadyState,
+    currentQuestionId: number | null
 }
 
-function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
+function UserPoints({isStaff, sendMessage, lastMessage, readyState, currentQuestionId}: Props) {
 
     const [userPoints, setUserPoints] = useState(noUsers);
     const [pointGlows, setPointGlows] = useState<{[key: string]: 'increase' | 'decrease' | null}>({});
     const previousPointsRef = useRef<{[key: string]: number}>({});
+
+    // Helper function to determine if points should be shown
+    const shouldShowPoints = () => {
+        return isStaff || !currentQuestionId || currentQuestionId < 41;
+    };
 
     const updatePointsWithGlow = (newPointsData: any) => {
         const newGlows: {[key: string]: 'increase' | 'decrease' | null} = {};
@@ -114,9 +120,17 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
     // https://medium.com/@ismailtaufiq19/display-objects-key-value-pairs-in-reactjs-95d8a26bd74b
     const setupUsers = () => {
 
-        // Sort users by points in descending order
+        // Sort users by points (for admins or when showing points) or alphabetically (when hiding points)
         const sortedUsers = Object.keys(userPoints.response)
-            .sort((a, b) => (userPoints.response as any)[b]['points'] - (userPoints.response as any)[a]['points']);
+            .sort((a, b) => {
+                if (shouldShowPoints()) {
+                    // Sort by points in descending order when points are visible
+                    return (userPoints.response as any)[b]['points'] - (userPoints.response as any)[a]['points'];
+                } else {
+                    // Sort alphabetically when points are hidden
+                    return a.localeCompare(b);
+                }
+            });
 
         if (isStaff) {
 
@@ -246,29 +260,31 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
                     <>
                         <Grid container key={key} className={"user-row"}>
 
-                            <Grid item xs={8}>
+                            <Grid item xs={shouldShowPoints() ? 8 : 12}>
                                 {key}:
                             </Grid>
 
-                            <Grid item xs={2}>
-                                <span style={{
-                                    transition: 'all 0.3s ease',
-                                    display: 'inline-block',
-                                    textShadow: pointGlows[key] === 'increase' 
-                                        ? '0 0 10px rgba(0, 255, 170, 0.8), 0 0 20px rgba(0, 255, 170, 0.5)' 
-                                        : pointGlows[key] === 'decrease' 
-                                        ? '0 0 10px rgba(255, 75, 87, 0.8), 0 0 20px rgba(255, 75, 87, 0.5)' 
-                                        : 'none',
-                                    transform: pointGlows[key] ? 'scale(1.1)' : 'scale(1)',
-                                    color: pointGlows[key] === 'increase' 
-                                        ? 'rgba(0, 255, 170, 1)' 
-                                        : pointGlows[key] === 'decrease' 
-                                        ? 'rgba(255, 75, 87, 1)' 
-                                        : 'inherit'
-                                }}>
-                                    {(userPoints.response as any)[key]['points']}
-                                </span>
-                            </Grid>
+                            {shouldShowPoints() && (
+                                <Grid item xs={2}>
+                                    <span style={{
+                                        transition: 'all 0.3s ease',
+                                        display: 'inline-block',
+                                        textShadow: pointGlows[key] === 'increase' 
+                                            ? '0 0 10px rgba(0, 255, 170, 0.8), 0 0 20px rgba(0, 255, 170, 0.5)' 
+                                            : pointGlows[key] === 'decrease' 
+                                            ? '0 0 10px rgba(255, 75, 87, 0.8), 0 0 20px rgba(255, 75, 87, 0.5)' 
+                                            : 'none',
+                                        transform: pointGlows[key] ? 'scale(1.1)' : 'scale(1)',
+                                        color: pointGlows[key] === 'increase' 
+                                            ? 'rgba(0, 255, 170, 1)' 
+                                            : pointGlows[key] === 'decrease' 
+                                            ? 'rgba(255, 75, 87, 1)' 
+                                            : 'inherit'
+                                    }}>
+                                        {(userPoints.response as any)[key]['points']}
+                                    </span>
+                                </Grid>
+                            )}
 
                         </Grid>
                     </>
@@ -290,7 +306,7 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState}: Props) {
                         letterSpacing: '2px',
                         textAlign: 'center'
                     }}>
-                        Points
+                        {shouldShowPoints() ? 'Points' : 'Users'}
                     </h3>
                 </Grid>
                 {setupUsers()}

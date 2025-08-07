@@ -236,6 +236,14 @@ function Home({isAdmin}: Props) {
 
     const renderQuestionNumber = () => {
         if (question) {
+            // Skip displaying question numbers for the first two questions
+            if (question <= 2) {
+                return null;
+            }
+            
+            // Start numbering from question 3 as "Question 1"
+            const displayNumber = question - 2;
+            
             return (
                 <h4 style={{
                     color: 'rgba(0, 255, 170, 0.9)',
@@ -245,7 +253,7 @@ function Home({isAdmin}: Props) {
                     textTransform: 'uppercase',
                     letterSpacing: '2px'
                 }}>
-                    Question {question}
+                    Question {displayNumber}
                 </h4>
             )
         }
@@ -467,7 +475,7 @@ function Home({isAdmin}: Props) {
 
                 <Grid item xs={isAdmin ? 1.2 : 1}>
                     <UserPoints lastMessage={lastMessage} sendMessage={sendMessage} readyState={readyState}
-                                isStaff={isAdmin}/>
+                                isStaff={isAdmin} currentQuestionId={question}/>
                 </Grid>
 
                 {renderAdminInfo()}
