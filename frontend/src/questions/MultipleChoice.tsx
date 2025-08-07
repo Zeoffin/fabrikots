@@ -31,16 +31,24 @@ function MultipleChoice({data, timer, sendMessage, showCorrectAnswer, correctAns
 
     return (
         <div style={{padding: "2rem"}}>
-            <h1 style={{
-                color: "white",
-                fontSize: "2.5rem",
-                fontWeight: "700",
-                marginBottom: "2rem",
-                textAlign: "center",
-                textShadow: "0 0 20px rgba(0, 255, 170, 0.5)"
-            }}>
-                {(data as any)["title"]}
-            </h1>
+            <div style={{ textAlign: "center", marginBottom: "2rem" }}>
+                <h1 style={{
+                    color: "white",
+                    fontSize: "2.5rem",
+                    fontWeight: "700",
+                    marginBottom: "1rem",
+                    textShadow: "0 0 20px rgba(0, 255, 170, 0.5)"
+                }}>
+                    {(data as any)["title"]}
+                </h1>
+                <div style={{
+                    color: "rgba(255, 255, 255, 0.9)",
+                    fontSize: "1.2rem",
+                    fontWeight: "600"
+                }}>
+                    <span>{(data as any)["points"]} {(data as any)["points"] === 1 ? 'punkts' : 'punkti'}</span>
+                </div>
+            </div>
             
             <div style={{
                 textAlign: "center",

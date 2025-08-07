@@ -66,6 +66,7 @@ class Questions(APIView):
         data["title"] = question.title
         data["type"] = question.type
         data["answers"] = question.answers
+        data["points"] = question.points
         data["time"] = question.time
         data["notes"] = question.notes
         data["image"] = question.image.url if question.image else None
