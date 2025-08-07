@@ -53,16 +53,24 @@ class QuizzConsumer(AsyncWebsocketConsumer):
             response["user_points"] = all_user_points
 
         if "direction" in received_msg:
-            await self.change_question(received_msg["direction"])
-            current_question_time = await self.get_current_question_time()
-            if current_question_time == -1:
-                await self.set_timer(-1)
-                response["timer"] = -1
+            change_result = await self.change_question(received_msg["direction"])
+            
+            if change_result == "quiz_ended":
+                # Quiz has ended, send leaderboard data
+                all_user_points = await self.get_all_user_points()
+                response["type"] = "quiz_ended"
+                response["user_points"] = all_user_points
             else:
-                await self.set_timer(current_question_time)
-                response["timer"] = current_question_time
-            response["type"] = "direction"
-            response["direction"] = received_msg["direction"]
+                # Normal question change
+                current_question_time = await self.get_current_question_time()
+                if current_question_time == -1:
+                    await self.set_timer(-1)
+                    response["timer"] = -1
+                else:
+                    await self.set_timer(current_question_time)
+                    response["timer"] = current_question_time
+                response["type"] = "direction"
+                response["direction"] = received_msg["direction"]
 
         if "start_timer" in received_msg:
             current_question_time = await self.get_current_question_time()
@@ -268,6 +276,15 @@ class QuizzConsumer(AsyncWebsocketConsumer):
             "selected_action_index": selected_action_index
         }))
 
+    async def quiz_ended(self, event):
+        status = event["status"]
+        user_points = event["user_points"]
+        await self.send(text_data=json.dumps({
+            "status": status,
+            "type": "quiz_ended",
+            "user_points": user_points
+        }))
+
     # ================= Operations ===============
 
     async def thread_start_timer(self):
@@ -325,6 +342,13 @@ class QuizzConsumer(AsyncWebsocketConsumer):
             else:
                 next_question = global_settings.currentQuestion.id - 1
 
+            # Check if we're trying to go past the last question
+            if direction == "next":
+                last_question = Question.objects.last()
+                if last_question and global_settings.currentQuestion.id >= last_question.id:
+                    # We've reached the end of the quiz, return special signal
+                    return "quiz_ended"
+
             question = Question.objects.get(id=next_question)
             
             # Reset the finished status when navigating to a question
@@ -334,9 +358,11 @@ class QuizzConsumer(AsyncWebsocketConsumer):
             
             global_settings.currentQuestion = question
             global_settings.save()
+            
+            return "question_changed"
 
         except Question.DoesNotExist:
-            pass
+            return "no_question"
 
     @database_sync_to_async
     def get_timer(self):

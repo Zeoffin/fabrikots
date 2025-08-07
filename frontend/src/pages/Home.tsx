@@ -13,6 +13,7 @@ import FreeText from "../questions/FreeText.tsx";
 import UserChoice from "../questions/UserChoice.tsx";
 import WheelSpin from "../components/WheelSpin.tsx";
 import WheelDisplay from "../components/WheelDisplay.tsx";
+import Leaderboard from "../components/Leaderboard.tsx";
 
 interface Props {
     isAdmin: boolean
@@ -42,6 +43,7 @@ function Home({isAdmin}: Props) {
     const [detailedVoteResults, setDetailedVoteResults] = useState(null);
     const [multipleChoiceResults, setMultipleChoiceResults] = useState(null);
     const [userPoints, setUserPoints] = useState(null);
+    const [quizEnded, setQuizEnded] = useState(false);
     const {sendMessage, lastMessage, readyState} = useWebSocket(pointsSocket);
 
 
@@ -102,6 +104,14 @@ function Home({isAdmin}: Props) {
 
             if (messageData["type"] === "wheelspin_result") {
                 // Update user points after wheelspin action
+                if (messageData["user_points"]) {
+                    setUserPoints(messageData["user_points"]);
+                }
+            }
+
+            // Handle quiz end
+            if (messageData["type"] === "quiz_ended") {
+                setQuizEnded(true);
                 if (messageData["user_points"]) {
                     setUserPoints(messageData["user_points"]);
                 }
@@ -294,6 +304,11 @@ function Home({isAdmin}: Props) {
     }
 
     const renderQuestion = () => {
+        // Show leaderboard if quiz has ended
+        if (quizEnded && userPoints) {
+            return <Leaderboard userPoints={userPoints} />;
+        }
+
         // For info questions with time = -1, show the info immediately
         if (data?.["type"] === "info" && data?.["time"] === -1) {
             return <Info data={data}/>
@@ -401,7 +416,7 @@ function Home({isAdmin}: Props) {
                                 </Grid>
 
 
-                                <Grid item xs={12} hidden={!isAdmin}>
+                                <Grid item xs={12} hidden={!isAdmin || quizEnded}>
                                     <div style={{
                                         display: "flex",
                                         justifyContent: "center",
@@ -480,7 +495,7 @@ function Home({isAdmin}: Props) {
 
                 {renderAdminInfo()}
 
-                {isAdmin && userPoints && (
+                {isAdmin && userPoints && !quizEnded && (
                     <WheelSpin 
                         userPoints={userPoints} 
                         sendMessage={sendMessage} 
