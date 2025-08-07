@@ -17,7 +17,7 @@ function Join({handleState}: Props) {
     const [terms, setTerms] = useState(false);
     const [timeRemaining, setTimeRemaining] = useState<string>('');
 
-    const eventStartTime = new Date('2025-08-08T17:00:00.000Z'); // 20:00 UTC+3 = 17:00 UTC
+    const eventStartTime = new Date('2025-08-08T16:00:00.000Z'); // 19:00 UTC+3 = 16:00 UTC
     const showLoginScreen = import.meta.env.VITE_SHOW_LOGIN_SCREEN === 'true';
 
     useEffect(() => {
