@@ -330,7 +330,7 @@ function Home({isAdmin}: Props) {
     const renderQuestion = () => {
         // Show leaderboard if quiz has ended
         if (quizEnded && userPoints) {
-            return <Leaderboard userPoints={userPoints} />;
+            return <Leaderboard userPoints={userPoints.response} />;
         }
 
         // For info questions with time = -1, show the info immediately
