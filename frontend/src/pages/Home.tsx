@@ -63,6 +63,10 @@ function Home({isAdmin}: Props) {
                 setVoteResults(null);
                 setDetailedVoteResults(null);
                 setMultipleChoiceResults(null);
+                // Refresh user points after direction change to maintain wheel user list
+                if (isAdmin) {
+                    getUserPoints();
+                }
             }
 
             if ("timer" in messageData) {
@@ -87,6 +91,10 @@ function Home({isAdmin}: Props) {
                 if (messageData["question_type"] === "multipleChoice" && messageData["multiple_choice_results"]) {
                     setMultipleChoiceResults(messageData["multiple_choice_results"]);
                 }
+                // Update userPoints to maintain wheel user list after timer ends
+                if (messageData["user_points"]) {
+                    setUserPoints({ response: messageData["user_points"] });
+                }
             }
 
             if (messageData["type"] === "answer_accepted") {
@@ -102,10 +110,17 @@ function Home({isAdmin}: Props) {
                 }
             }
 
+            // Handle manual point changes to maintain wheel user list
+            if (messageData["type"] === "points") {
+                if (messageData["user_points"]) {
+                    setUserPoints({ response: messageData["user_points"] });
+                }
+            }
+
             if (messageData["type"] === "wheelspin_result") {
                 // Update user points after wheelspin action
                 if (messageData["user_points"]) {
-                    setUserPoints(messageData["user_points"]);
+                    setUserPoints({ response: messageData["user_points"] });
                 }
             }
 
@@ -113,13 +128,13 @@ function Home({isAdmin}: Props) {
             if (messageData["type"] === "quiz_ended") {
                 setQuizEnded(true);
                 if (messageData["user_points"]) {
-                    setUserPoints(messageData["user_points"]);
+                    setUserPoints({ response: messageData["user_points"] });
                 }
             }
 
-            // Update userPoints from various message types
+            // Update userPoints from various message types (fallback)
             if (messageData["user_points"]) {
-                setUserPoints(messageData["user_points"]);
+                setUserPoints({ response: messageData["user_points"] });
             }
 
         }
