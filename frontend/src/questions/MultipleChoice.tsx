@@ -6,10 +6,11 @@ interface props {
     sendMessage: any,
     showCorrectAnswer: boolean,
     correctAnswer: string | null,
-    multipleChoiceResults?: {[key: string]: string[]} | null
+    multipleChoiceResults?: {[key: string]: string[]} | null,
+    currentQuestionId: number | null
 }
 
-function MultipleChoice({data, timer, sendMessage, showCorrectAnswer, correctAnswer, multipleChoiceResults}: props) {
+function MultipleChoice({data, timer, sendMessage, showCorrectAnswer, correctAnswer, multipleChoiceResults, currentQuestionId}: props) {
 
     const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null);
 
@@ -46,7 +47,11 @@ function MultipleChoice({data, timer, sendMessage, showCorrectAnswer, correctAns
                     fontSize: "1.2rem",
                     fontWeight: "600"
                 }}>
-                    <span>{(data as any)["points"]} {(data as any)["points"] === 1 ? 'punkts' : 'punkti'}</span>
+                    {currentQuestionId && currentQuestionId > 40 ? (
+                        (data as any)["points"] > 1 ? <span>Bonus punkti!</span> : null
+                    ) : (
+                        <span>{(data as any)["points"]} {(data as any)["points"] === 1 ? 'punkts' : 'punkti'}</span>
+                    )}
                 </div>
             </div>
             

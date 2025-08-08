@@ -353,6 +353,7 @@ function Home({isAdmin}: Props) {
                     showCorrectAnswer={showCorrectAnswer}
                     correctAnswer={correctAnswer}
                     multipleChoiceResults={multipleChoiceResults}
+                    currentQuestionId={question}
                 />
 
             case "freeText":
@@ -365,6 +366,7 @@ function Home({isAdmin}: Props) {
                     allUserAnswers={allUserAnswers}
                     isAdmin={isAdmin}
                     onAcceptAnswer={acceptAnswer}
+                    currentQuestionId={question}
                 />
 
             case "userChoice":

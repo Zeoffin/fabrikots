@@ -8,10 +8,11 @@ interface props {
     correctAnswer: string | null,
     allUserAnswers: Array<{username: string, answer: string, accepted?: boolean}> | null,
     isAdmin?: boolean,
-    onAcceptAnswer?: (username: string) => void
+    onAcceptAnswer?: (username: string) => void,
+    currentQuestionId: number | null
 }
 
-function FreeText({data, timer, sendMessage, showCorrectAnswer, correctAnswer, allUserAnswers, isAdmin, onAcceptAnswer}: props) {
+function FreeText({data, timer, sendMessage, showCorrectAnswer, correctAnswer, allUserAnswers, isAdmin, onAcceptAnswer, currentQuestionId}: props) {
 
     const [userAnswer, setUserAnswer] = useState("");
 
@@ -50,7 +51,11 @@ function FreeText({data, timer, sendMessage, showCorrectAnswer, correctAnswer, a
                     fontSize: "1.2rem",
                     fontWeight: "600"
                 }}>
-                    <span>{(data as any)["points"]} {(data as any)["points"] === 1 ? 'punkts' : 'punkti'}</span>
+                    {currentQuestionId && currentQuestionId > 40 ? (
+                        (data as any)["points"] > 1 ? <span>Bonus punkti!</span> : null
+                    ) : (
+                        <span>{(data as any)["points"]} {(data as any)["points"] === 1 ? 'punkts' : 'punkti'}</span>
+                    )}
                 </div>
             </div>
             
