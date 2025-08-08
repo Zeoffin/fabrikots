@@ -19,6 +19,15 @@ interface Props {
     isAdmin: boolean
 }
 
+interface UserPoints {
+    response: {
+        [username: string]: {
+            active: boolean;
+            points: number;
+        };
+    };
+}
+
 function Home({isAdmin}: Props) {
 
     /***
@@ -42,7 +51,7 @@ function Home({isAdmin}: Props) {
     const [voteResults, setVoteResults] = useState(null);
     const [detailedVoteResults, setDetailedVoteResults] = useState(null);
     const [multipleChoiceResults, setMultipleChoiceResults] = useState(null);
-    const [userPoints, setUserPoints] = useState(null);
+    const [userPoints, setUserPoints] = useState<UserPoints | null>(null);
     const [quizEnded, setQuizEnded] = useState(false);
     const {sendMessage, lastMessage, readyState} = useWebSocket(pointsSocket);
 
