@@ -14,6 +14,8 @@ class QuizzConsumer(AsyncWebsocketConsumer):
     DOCS: https://channels.readthedocs.io/en/stable/tutorial/part_1.html
     """
 
+    # Timer so we dont have to wait a long time when testing questions
+    # TODO: Make it 14 only when local env ?
     TIMER = 14
 
     async def connect(self):
@@ -296,8 +298,8 @@ class QuizzConsumer(AsyncWebsocketConsumer):
             print("Skipping timer for info question with time = -1")
             return
             
-        # timer_duration = current_question_time if current_question_time > 0 else self.TIMER
-        timer_duration = self.TIMER
+        timer_duration = current_question_time if current_question_time > 0 else self.TIMER
+        # timer_duration = self.TIMER
         
         if timer_duration > 0:
             print(f"Starting timer for {timer_duration} seconds...")
