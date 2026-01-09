@@ -1,10 +1,10 @@
 import '../App.css'
 import UserPoints from "../components/UserPoints.tsx";
 import axiosInstance from "../AxiosInstance.tsx";
-import useWebSocket from "react-use-websocket";
+import useWebSocket, {ReadyState} from "react-use-websocket";
 import {Grid} from "@mui/material";
 import Logout from "../components/Logout.tsx";
-import {useEffect, useState} from "react";
+import {useEffect, useState, useCallback, useRef} from "react";
 import {Button} from "@mui/material";
 import Info from "../questions/Info.tsx";
 import {pointsSocket} from "../../WebSockets.tsx";
@@ -53,14 +53,60 @@ function Home({isAdmin}: Props) {
     const [multipleChoiceResults, setMultipleChoiceResults] = useState(null);
     const [userPoints, setUserPoints] = useState<UserPoints | null>(null);
     const [quizEnded, setQuizEnded] = useState(false);
-    const {sendMessage, lastMessage, readyState} = useWebSocket(pointsSocket);
+    const reconnectAttempts = useRef(0);
 
+    // WebSocket with reconnection logic and exponential backoff
+    const {sendMessage, lastMessage, readyState} = useWebSocket(pointsSocket, {
+        shouldReconnect: () => true,
+        reconnectAttempts: 20,
+        reconnectInterval: (attemptNumber) => {
+            // Exponential backoff: 1s, 2s, 4s, 8s, 16s, max 30s
+            const interval = Math.min(Math.pow(2, attemptNumber) * 1000, 30000);
+            console.log(`WebSocket reconnecting in ${interval}ms (attempt ${attemptNumber + 1})`);
+            return interval;
+        },
+        onOpen: () => {
+            console.log('WebSocket connected');
+            reconnectAttempts.current = 0;
+            // Refresh data on reconnect
+            getQuestion();
+            if (isAdmin) {
+                getUserPoints();
+            }
+        },
+        onClose: (event) => {
+            console.log('WebSocket disconnected:', event.code, event.reason);
+        },
+        onError: (event) => {
+            console.error('WebSocket error:', event);
+        },
+    });
 
-    // TODO: Websockets - https://www.npmjs.com/package/react-use-websocket
+    // Helper function to safely send messages (handles both objects and strings)
+    const safeSendMessage = useCallback((message: object | string) => {
+        if (readyState === ReadyState.OPEN) {
+            const payload = typeof message === 'string' ? message : JSON.stringify(message);
+            sendMessage(payload);
+        } else {
+            console.warn('Cannot send message: WebSocket not connected (state:', readyState, ')');
+        }
+    }, [readyState, sendMessage]);
 
     useEffect(() => {
         if (lastMessage) {
-            const messageData = JSON.parse(lastMessage["data"]);
+            let messageData;
+            try {
+                messageData = JSON.parse(lastMessage.data);
+            } catch (e) {
+                console.error('Failed to parse WebSocket message:', e);
+                return;
+            }
+
+            // Handle heartbeat ping from server
+            if (messageData.type === 'ping') {
+                safeSendMessage({ type: 'pong' });
+                return;
+            }
 
             if ("direction" in messageData) {
                 getQuestion();
@@ -148,7 +194,7 @@ function Home({isAdmin}: Props) {
 
         }
 
-    }, [lastMessage]);
+    }, [lastMessage, safeSendMessage]);
 
     const fetchInitialData = () => {
         if (!data) {
@@ -172,7 +218,7 @@ function Home({isAdmin}: Props) {
     // ===================================================================================          Timer
 
     const startTimer = (_e: React.MouseEvent) => {
-        sendMessage(JSON.stringify({"start_timer": data?.["time"]}));
+        safeSendMessage({"start_timer": data?.["time"]});
     }
 
     // ===================================================================================      BACKEND REQUESTS
@@ -195,17 +241,17 @@ function Home({isAdmin}: Props) {
     }
 
     const chooseQuestion = (_e: React.MouseEvent, direction: string) => {
-        sendMessage(JSON.stringify({"direction": direction}));
+        safeSendMessage({"direction": direction});
     }
 
     const acceptAnswer = (username: string) => {
         if (isAdmin && question) {
-            sendMessage(JSON.stringify({
+            safeSendMessage({
                 "accept_answer": {
                     "username": username,
                     "question_id": question
                 }
-            }));
+            });
         }
     }
 
@@ -373,7 +419,7 @@ function Home({isAdmin}: Props) {
                 return <MultipleChoice 
                     data={data} 
                     timer={timer} 
-                    sendMessage={sendMessage}
+                    sendMessage={safeSendMessage}
                     showCorrectAnswer={showCorrectAnswer}
                     correctAnswer={correctAnswer}
                     multipleChoiceResults={multipleChoiceResults}
@@ -384,7 +430,7 @@ function Home({isAdmin}: Props) {
                 return <FreeText 
                     data={data} 
                     timer={timer} 
-                    sendMessage={sendMessage}
+                    sendMessage={safeSendMessage}
                     showCorrectAnswer={showCorrectAnswer}
                     correctAnswer={correctAnswer}
                     allUserAnswers={allUserAnswers}
@@ -397,7 +443,7 @@ function Home({isAdmin}: Props) {
                 return <UserChoice 
                     data={data} 
                     timer={timer} 
-                    sendMessage={sendMessage}
+                    sendMessage={safeSendMessage}
                     showCorrectAnswer={showCorrectAnswer}
                     correctAnswer={correctAnswer}
                     voteResults={voteResults}
@@ -515,7 +561,7 @@ function Home({isAdmin}: Props) {
                 </Grid>
 
                 <Grid item xs={isAdmin ? 1.2 : 1}>
-                    <UserPoints lastMessage={lastMessage} sendMessage={sendMessage} readyState={readyState}
+                    <UserPoints lastMessage={lastMessage} sendMessage={safeSendMessage} readyState={readyState}
                                 isStaff={isAdmin} currentQuestionId={question}/>
                 </Grid>
 
@@ -524,7 +570,7 @@ function Home({isAdmin}: Props) {
                 {isAdmin && userPoints && !quizEnded && (
                     <WheelSpin 
                         userPoints={userPoints} 
-                        sendMessage={sendMessage} 
+                        sendMessage={safeSendMessage} 
                         readyState={readyState}
                         lastMessage={lastMessage}
                     />

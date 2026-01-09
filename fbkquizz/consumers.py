@@ -1,12 +1,14 @@
 # chat/consumers.py
 import asyncio
 import json
-import time
-import threading
+import logging
 
 from channels.db import database_sync_to_async
 from channels.generic.websocket import AsyncWebsocketConsumer
+
 from .models import UserSettings, User, GlobalSettings, Question
+
+logger = logging.getLogger(__name__)
 
 
 class QuizzConsumer(AsyncWebsocketConsumer):
@@ -18,8 +20,10 @@ class QuizzConsumer(AsyncWebsocketConsumer):
     # TODO: Make it 14 only when local env ?
     TIMER = 14
 
-    async def connect(self):
+    # Heartbeat interval in seconds (30 seconds keeps connections alive through most proxies)
+    HEARTBEAT_INTERVAL = 30
 
+    async def connect(self):
         # self.room_name = self.scope['url_route']['kwargs']['room_name']
         self.room_name = "mrgreen"
         self.room_group_name = 'Quizz'
@@ -29,159 +33,210 @@ class QuizzConsumer(AsyncWebsocketConsumer):
         await self.channel_layer.group_add(self.room_group_name, self.channel_name)
         await self.accept()
 
+        # Start heartbeat to keep connection alive
+        self._heartbeat_task = asyncio.create_task(self.heartbeat())
+
+    async def heartbeat(self):
+        """Send periodic ping messages to keep connection alive and detect dead connections."""
+        try:
+            while True:
+                await asyncio.sleep(self.HEARTBEAT_INTERVAL)
+                await self.send(text_data=json.dumps({"type": "ping"}))
+        except asyncio.CancelledError:
+            pass
+        except Exception as e:
+            logger.error(f"Heartbeat error: {e}")
+
     async def disconnect(self, close_code):
+        # Cancel any running timer task
+        if hasattr(self, '_timer_task') and not self._timer_task.done():
+            self._timer_task.cancel()
+        # Cancel heartbeat task if running
+        if hasattr(self, '_heartbeat_task') and not self._heartbeat_task.done():
+            self._heartbeat_task.cancel()
         # Leave room group
-        await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+        try:
+            await self.channel_layer.group_discard(self.room_group_name, self.channel_name)
+        except Exception as e:
+            print(f"Error during disconnect cleanup: {e}")
 
     async def receive(self, text_data):
+        # Parse JSON with error handling
+        try:
+            received_msg = json.loads(text_data)
+        except json.JSONDecodeError as e:
+            logger.error(f"Invalid JSON received: {e}")
+            await self.send(text_data=json.dumps({
+                "status": "error",
+                "message": "Invalid JSON format"
+            }))
+            return
 
-        response = {
-            "status": "success",
-            "timer": await self.get_timer(),
-            # "q_finished":
-        }
-        received_msg = json.loads(text_data)
+        # Handle heartbeat pong response from client
+        if received_msg.get("type") == "pong":
+            return
 
-        print("INCOMING MESSAGE ========")
-        print(received_msg)
+        try:
+            response = {
+                "status": "success",
+                "timer": await self.get_timer(),
+            }
 
-        if "points" in received_msg:
-            user_key = received_msg["points"]
-            add_point = user_key["add_point"]
+            print("INCOMING MESSAGE ========")
+            print(received_msg)
 
-            success = await self.save_user_settings(user_key, add_point)
-            all_user_points = await self.get_all_user_points()
-            response["type"] = "points"
-            response["user_points"] = all_user_points
+            if "points" in received_msg:
+                user_key = received_msg["points"]
+                add_point = user_key.get("add_point")
+                if add_point is None:
+                    raise KeyError("Missing 'add_point' in points message")
 
-        if "direction" in received_msg:
-            change_result = await self.change_question(received_msg["direction"])
-            
-            if change_result == "quiz_ended":
-                # Quiz has ended, send leaderboard data
+                await self.save_user_settings(user_key, add_point)
                 all_user_points = await self.get_all_user_points()
-                response["type"] = "quiz_ended"
+                response["type"] = "points"
                 response["user_points"] = all_user_points
-            else:
-                # Normal question change
+
+            if "direction" in received_msg:
+                change_result = await self.change_question(received_msg["direction"])
+
+                if change_result == "quiz_ended":
+                    # Quiz has ended, send leaderboard data
+                    all_user_points = await self.get_all_user_points()
+                    response["type"] = "quiz_ended"
+                    response["user_points"] = all_user_points
+                else:
+                    # Normal question change
+                    current_question_time = await self.get_current_question_time()
+                    if current_question_time == -1:
+                        await self.set_timer(-1)
+                        response["timer"] = -1
+                    else:
+                        await self.set_timer(current_question_time)
+                        response["timer"] = current_question_time
+                    response["type"] = "direction"
+                    response["direction"] = received_msg["direction"]
+
+            if "start_timer" in received_msg:
                 current_question_time = await self.get_current_question_time()
-                if current_question_time == -1:
-                    await self.set_timer(-1)
+                current_question_type = await self.get_current_question_type()
+
+                # Don't start timer for info questions with time = -1
+                if current_question_type == "info" and current_question_time == -1:
+                    response["type"] = "timer_skipped"
                     response["timer"] = -1
                 else:
-                    await self.set_timer(current_question_time)
+                    response["type"] = "start_timer"
                     response["timer"] = current_question_time
-                response["type"] = "direction"
-                response["direction"] = received_msg["direction"]
 
-        if "start_timer" in received_msg:
-            current_question_time = await self.get_current_question_time()
-            current_question_type = await self.get_current_question_type()
-            
-            # Don't start timer for info questions with time = -1
-            if current_question_type == "info" and current_question_time == -1:
-                response["type"] = "timer_skipped"
-                response["timer"] = -1
-            else:
-                response["type"] = "start_timer"
-                response["timer"] = current_question_time
+            if "answer" in received_msg:
+                await self.save_user_answer(received_msg["answer"])
+                response["type"] = "answer_saved"
 
-        if "answer" in received_msg:
-            await self.save_user_answer(received_msg["answer"])
-            response["type"] = "answer_saved"
-            
-        if "accept_answer" in received_msg:
-            # Only allow admin to accept answers
-            if self.user.username == "markuss":
-                accept_data = received_msg["accept_answer"]
-                success = await self.accept_user_answer(accept_data["username"], accept_data["question_id"])
-                if success:
-                    all_user_points = await self.get_all_user_points()
-                    response["type"] = "answer_accepted"
-                    response["accepted_username"] = accept_data["username"]
-                    response["question_id"] = accept_data["question_id"]
-                    response["user_points"] = all_user_points
+            if "accept_answer" in received_msg:
+                # Only allow admin to accept answers
+                if self.user.username == "markuss":
+                    accept_data = received_msg["accept_answer"]
+                    success = await self.accept_user_answer(accept_data["username"], accept_data["question_id"])
+                    if success:
+                        all_user_points = await self.get_all_user_points()
+                        response["type"] = "answer_accepted"
+                        response["accepted_username"] = accept_data["username"]
+                        response["question_id"] = accept_data["question_id"]
+                        response["user_points"] = all_user_points
 
-        if "wheelspin" in received_msg:
-            # Only allow admin to trigger wheelspins
-            if self.user.username == "markuss":
-                wheelspin_data = received_msg["wheelspin"]
-                target_user = wheelspin_data["target_user"]
-                action = wheelspin_data["action"]
-                amount = wheelspin_data.get("amount", 0)
-                other_user = wheelspin_data.get("other_user", "")
-                
-                # success = await self.process_wheelspin_action(target_user, action, amount, other_user)
-                # if success:
-                #     all_user_points = await self.get_all_user_points()
-                #     response["type"] = "wheelspin_result"
-                #     response["target_user"] = target_user
-                #     response["action"] = action
-                #     response["amount"] = amount
-                #     response["other_user"] = other_user
-                #     response["user_points"] = all_user_points
+            if "wheelspin" in received_msg:
+                # Only allow admin to trigger wheelspins
+                if self.user.username == "markuss":
+                    wheelspin_data = received_msg["wheelspin"]
+                    target_user = wheelspin_data["target_user"]
+                    action = wheelspin_data["action"]
+                    amount = wheelspin_data.get("amount", 0)
+                    other_user = wheelspin_data.get("other_user", "")
 
-        if "wheelspin_start" in received_msg:
-            # Only allow admin to start wheelspins - this shows the wheel to everyone
-            if self.user.username == "markuss":
-                import random
-                wheelspin_start_data = received_msg["wheelspin_start"]
-                
-                # Define wheel actions on server side (must match frontend)
-                def get_random_hsl():
+                    # success = await self.process_wheelspin_action(target_user, action, amount, other_user)
+                    # if success:
+                    #     all_user_points = await self.get_all_user_points()
+                    #     response["type"] = "wheelspin_result"
+                    #     response["target_user"] = target_user
+                    #     response["action"] = action
+                    #     response["amount"] = amount
+                    #     response["other_user"] = other_user
+                    #     response["user_points"] = all_user_points
+
+            if "wheelspin_start" in received_msg:
+                # Only allow admin to start wheelspins - this shows the wheel to everyone
+                if self.user.username == "markuss":
                     import random
-                    hue = random.randint(0, 360)
-                    saturation = random.randint(1, 100)
-                    lightness = random.randint(1, 100)
-                    return f"hsl({hue}, {saturation}%, {lightness}%)"
-                
-                wheel_actions = [
-                    {"id": "mute_3_rounds", "label": "Tev mute on discord for 3 rounds", "color": get_random_hsl()},
-                    {"id": "mute_3_rounds", "label": "Kādam citam mute on discord uz 4 rounds", "color": get_random_hsl()},
-                    {"id": "no_effect", "label": "Nu neko nedabūji", "color": get_random_hsl()},
-                    {"id": "add_5_points", "label": "+5 punkti", "color": get_random_hsl()},
-                    {"id": "add_5_points", "label": "+1 punkti", "color": get_random_hsl()},
-                    {"id": "add_5_points", "label": "+3 punkti", "color": get_random_hsl()},
-                    {"id": "remove_1_point", "label": "-1 punkts", "color": get_random_hsl()},
-                    {"id": "remove_10_point", "label": "-10 punkti", "color": get_random_hsl()},
-                    {"id": "remove_3_point", "label": "-3 punkti", "color": get_random_hsl()},
-                    {"id": "swap_points", "label": "Punktu Maiņa", "color": get_random_hsl()},
-                    {"id": "no_effect", "label": "Nu neko nedabūji", "color": get_random_hsl()}
-                ]
-                
-                # Server determines the result
-                selected_action_index = random.randint(0, len(wheel_actions) - 1)
-                selected_action = wheel_actions[selected_action_index]
-                
-                # Calculate precise rotation to land on the selected section
-                base_rotations = 5 + random.random() * 3  # 5-8 full rotations for good visual effect
-                angle_per_section = (2 * 3.14159) / len(wheel_actions)
-                
-                # Calculate the center angle of the target section
-                # The wheel is drawn starting from index 0, and the pointer points up (top)
-                target_angle = selected_action_index * angle_per_section + (angle_per_section / 2)
-                
-                # Final rotation = base rotations + adjustment to land on target
-                # We need to subtract the target angle because the wheel rotates clockwise
-                final_rotation = (base_rotations * 2 * 3.14159) - target_angle
-                
-                # Add the selected action index for frontend to verify
-                response["selected_action_index"] = selected_action_index
-                
-                response["type"] = "wheelspin_start"
-                response["target_user"] = wheelspin_start_data["target_user"]
-                response["final_rotation"] = final_rotation
-                response["selected_action"] = selected_action
-                response["spin_duration"] = 3000
+                    wheelspin_start_data = received_msg["wheelspin_start"]
 
-        print("RESPONSE SENT")
-        print(response)
+                    # Define wheel actions on server side (must match frontend)
+                    def get_random_hsl():
+                        import random
+                        hue = random.randint(0, 360)
+                        saturation = random.randint(1, 100)
+                        lightness = random.randint(1, 100)
+                        return f"hsl({hue}, {saturation}%, {lightness}%)"
 
-        # Only send message to room group if there's a valid type
-        if "type" in response:
-            await self.channel_layer.group_send(
-                self.room_group_name, response
-            )
+                    wheel_actions = [
+                        {"id": "mute_3_rounds", "label": "Tev mute on discord for 3 rounds", "color": get_random_hsl()},
+                        {"id": "mute_3_rounds", "label": "Kādam citam mute on discord uz 4 rounds", "color": get_random_hsl()},
+                        {"id": "no_effect", "label": "Nu neko nedabūji", "color": get_random_hsl()},
+                        {"id": "add_5_points", "label": "+5 punkti", "color": get_random_hsl()},
+                        {"id": "add_5_points", "label": "+1 punkti", "color": get_random_hsl()},
+                        {"id": "add_5_points", "label": "+3 punkti", "color": get_random_hsl()},
+                        {"id": "remove_1_point", "label": "-1 punkts", "color": get_random_hsl()},
+                        {"id": "remove_10_point", "label": "-10 punkti", "color": get_random_hsl()},
+                        {"id": "remove_3_point", "label": "-3 punkti", "color": get_random_hsl()},
+                        {"id": "swap_points", "label": "Punktu Maiņa", "color": get_random_hsl()},
+                        {"id": "no_effect", "label": "Nu neko nedabūji", "color": get_random_hsl()}
+                    ]
+
+                    # Server determines the result
+                    selected_action_index = random.randint(0, len(wheel_actions) - 1)
+                    selected_action = wheel_actions[selected_action_index]
+
+                    # Calculate precise rotation to land on the selected section
+                    base_rotations = 5 + random.random() * 3  # 5-8 full rotations for good visual effect
+                    angle_per_section = (2 * 3.14159) / len(wheel_actions)
+
+                    # Calculate the center angle of the target section
+                    # The wheel is drawn starting from index 0, and the pointer points up (top)
+                    target_angle = selected_action_index * angle_per_section + (angle_per_section / 2)
+
+                    # Final rotation = base rotations + adjustment to land on target
+                    # We need to subtract the target angle because the wheel rotates clockwise
+                    final_rotation = (base_rotations * 2 * 3.14159) - target_angle
+
+                    # Add the selected action index for frontend to verify
+                    response["selected_action_index"] = selected_action_index
+
+                    response["type"] = "wheelspin_start"
+                    response["target_user"] = wheelspin_start_data["target_user"]
+                    response["final_rotation"] = final_rotation
+                    response["selected_action"] = selected_action
+                    response["spin_duration"] = 3000
+
+            print("RESPONSE SENT")
+            print(response)
+
+            # Only send message to room group if there's a valid type
+            if "type" in response:
+                await self.channel_layer.group_send(
+                    self.room_group_name, response
+                )
+
+        except KeyError as e:
+            logger.error(f"Missing key in message: {e}")
+            await self.send(text_data=json.dumps({
+                "status": "error",
+                "message": f"Missing required field: {e}"
+            }))
+        except Exception as e:
+            logger.error(f"Error processing message: {e}")
+            await self.send(text_data=json.dumps({
+                "status": "error",
+                "message": "An error occurred processing your request"
+            }))
 
     # ================  TYPES ==============
     async def direction(self, event):
@@ -200,8 +255,15 @@ class QuizzConsumer(AsyncWebsocketConsumer):
         }))
 
     async def start_timer(self, event):
-        timer_thread = threading.Thread(target=asyncio.run, args=(self.thread_start_timer(),))
-        timer_thread.start()
+        # Cancel any existing timer task to prevent multiple timers running
+        if hasattr(self, '_timer_task') and not self._timer_task.done():
+            self._timer_task.cancel()
+            try:
+                await self._timer_task
+            except asyncio.CancelledError:
+                pass
+        # Use asyncio.create_task instead of threading
+        self._timer_task = asyncio.create_task(self.run_timer())
 
     async def timer_ended(self, event):
         status = event["status"]
@@ -289,7 +351,7 @@ class QuizzConsumer(AsyncWebsocketConsumer):
 
     # ================= Operations ===============
 
-    async def thread_start_timer(self):
+    async def run_timer(self):
         current_question_time = await self.get_current_question_time()
         current_question_type = await self.get_current_question_type()
         
@@ -309,7 +371,7 @@ class QuizzConsumer(AsyncWebsocketConsumer):
                 # self.channel_layer.group_send(
                 #     self.room_group_name, {"timer": timer}
                 # )
-                time.sleep(1)
+                await asyncio.sleep(1)
 
             await self.allocate_points_and_finish()
             correct_answer = await self.get_current_question_correct_answer()

@@ -219,11 +219,27 @@ else:
     # Production - use Railway's Redis URL if available, otherwise in-memory
     redis_url = config('REDIS_URL', default=None)
     if redis_url:
+        import urllib.parse
+        parsed_redis = urllib.parse.urlparse(redis_url)
+
+        # Build hosts config - channels-redis expects (host, port) tuple or dict with ssl
+        redis_host = parsed_redis.hostname or 'localhost'
+        redis_port = parsed_redis.port or 6379
+
+        # Build the host config dict to handle auth and SSL properly
+        redis_config = {
+            'address': (redis_host, redis_port),
+        }
+        if parsed_redis.password:
+            redis_config['password'] = parsed_redis.password
+
         CHANNEL_LAYERS = {
             'default': {
                 'BACKEND': "channels_redis.core.RedisChannelLayer",
                 'CONFIG': {
-                    'hosts': [redis_url],
+                    'hosts': [redis_config],
+                    'capacity': 1500,
+                    'expiry': 60,
                 },
             },
         }
