@@ -14,7 +14,7 @@ const noUsers = {
 
 interface Props {
     isStaff: boolean,
-    sendMessage: (message: string) => void,
+    sendMessage: (message: string | object) => void,
     lastMessage: MessageEvent | null,
     readyState: ReadyState,
     currentQuestionId: number | null
@@ -115,7 +115,7 @@ function UserPoints({isStaff, sendMessage, lastMessage, readyState, currentQuest
         }
         sendMessage(JSON.stringify({"points": point_change}));
 
-    }, [])
+    }, [sendMessage])
 
     // https://medium.com/@ismailtaufiq19/display-objects-key-value-pairs-in-reactjs-95d8a26bd74b
     const setupUsers = () => {
